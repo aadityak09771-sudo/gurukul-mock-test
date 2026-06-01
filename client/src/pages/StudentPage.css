@@ -1,0 +1,172 @@
+.student-screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f0f2f8;
+}
+
+/* NAVBAR */
+.student-nav {
+  min-height: 64px;
+  background: linear-gradient(135deg, #0f1b3d, #1a2a5e);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 32px;
+}
+
+/* BRAND */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  width: 45px;
+  height: 45px;
+  background: white;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2px;
+  flex-shrink: 0;
+}
+
+.brand-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.brand-name {
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.brand-title {
+  margin: 0;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 18px;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.brand-tagline {
+  margin: 4px 0 0 0;
+  color: #60a5fa;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 1.1;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* USER INFO */
+.student-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  background: #f5a623;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #0f1b3d;
+}
+
+.s-name {
+  color: rgba(255,255,255,0.9);
+  font-size: 14px;
+}
+
+/* LOGOUT */
+.btn-logout {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* CONTENT */
+.student-content {
+  flex: 1;
+  padding: 32px;
+  max-width: 1100px;
+  margin: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ================= MOBILE RESPONSIVENESS ================= */
+@media (max-width: 768px) {
+  .student-nav {
+    flex-direction: column;
+    padding: 15px;
+    gap: 15px;
+    height: auto;
+  }
+
+  .brand {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    text-align: left;
+    width: 100%;
+    gap: 12px;
+  }
+
+  .brand-icon {
+    width: 45px;
+    height: 45px;
+  }
+
+  .brand-name,
+  .brand-title,
+  .brand-tagline {
+    white-space: normal;
+    text-align: left;
+  }
+
+  .brand-title { 
+    font-size: 16px; 
+    line-height: 1.2;
+  }
+  .brand-tagline { 
+    font-size: 12px; 
+    margin-top: 4px;
+    line-height: 1.2;
+  }
+
+  .student-info {
+    width: 100%;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .student-content {
+    padding: 15px;
+  }
+}

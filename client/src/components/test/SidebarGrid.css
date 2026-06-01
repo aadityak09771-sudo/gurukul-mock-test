@@ -1,0 +1,54 @@
+.sidebar-grid {
+  width: 250px;
+  padding: 20px;
+  background: rgba(255,255,255,0.04);
+  border-right: 1px solid rgba(255,255,255,0.08);
+}
+
+/* TITLE */
+.section-title {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+/* GRID */
+.q-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+/* BUTTON */
+.q-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+/* STATES */
+.q-btn.unattempted {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.5);
+}
+
+.q-btn.attempted {
+  background: #22c55e;
+  color: white;
+}
+
+.q-btn.marked {
+  background: #8b5cf6;
+  color: white;
+}
+
+/* CURRENT */
+.q-btn.current {
+  outline: 2px solid #f5a623;
+}

@@ -1,0 +1,97 @@
+.submitted-page {
+  min-height: 100vh;
+  background: linear-gradient(
+    135deg,
+    #0f172a,
+    #1e293b
+  );
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+}
+
+.submitted-card {
+
+  width: 100%;
+  max-width: 650px;
+
+  background: white;
+
+  border-radius: 28px;
+
+  padding: 60px;
+
+  text-align: center;
+
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.25);
+
+  animation: fadeUp 0.5s ease;
+}
+
+.success-icon {
+
+  font-size: 90px;
+  margin-bottom: 20px;
+}
+
+.submitted-card h1 {
+
+  font-size: 42px;
+  color: #16a34a;
+  margin-bottom: 12px;
+}
+
+.submitted-card h2 {
+
+  font-size: 24px;
+  margin-bottom: 18px;
+  color: #0f172a;
+}
+
+.submitted-card p {
+
+  color: #64748b;
+  line-height: 1.8;
+  margin-bottom: 35px;
+}
+
+.back-btn {
+
+  border: none;
+  background: #0f172a;
+
+  color: white;
+
+  padding: 14px 32px;
+
+  border-radius: 14px;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.3s;
+}
+
+.back-btn:hover {
+
+  transform: translateY(-3px);
+}
+
+@keyframes fadeUp {
+
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

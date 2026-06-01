@@ -1,0 +1,66 @@
+.start-page {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f3f5f9;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.start-card {
+  width: 450px;
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.start-card h2 {
+  margin-bottom: 20px;
+}
+
+.start-card input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
+
+.start-card button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 15px;
+  border-radius: 8px;
+  border: none;
+  background: #2c3e50;
+  color: white;
+  cursor: pointer;
+}
+
+.instructions {
+  text-align: left;
+  margin: 20px 0;
+}
+
+.instructions li {
+  margin-bottom: 10px;
+}
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-back {
+  flex: 1;
+  background: #ecf0f1;
+  color: black;
+}
+
+.btn-start {
+  flex: 2;
+  background: #27ae60;
+}

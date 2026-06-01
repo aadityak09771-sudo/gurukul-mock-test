@@ -1,0 +1,15 @@
+.test-wrapper {
+  min-height: 100vh;
+  background: #0f1b3d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* LOADING */
+.test-loading,
+.test-error {
+  color: white;
+  font-size: 18px;
+  text-align: center;
+}

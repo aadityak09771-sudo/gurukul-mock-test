@@ -1,0 +1,91 @@
+.test-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid #eef1f8;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  transition: 0.2s;
+  position: relative;
+}
+
+.test-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* TOP BORDER EFFECT */
+.test-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #f5a623, #e8941a);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
+
+/* TITLE */
+.tc-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f1b3d;
+  margin-bottom: 10px;
+}
+
+/* META */
+.tc-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+  margin-bottom: 12px;
+  color: #8b93a7;
+}
+
+/* CHIPS */
+.chip {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.chip.verbal {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+.chip.numerical {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.chip.reasoning {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+/* MARKING */
+.tc-marking {
+  font-size: 12px;
+  color: #8b93a7;
+  margin-bottom: 15px;
+}
+
+/* BUTTON */
+.btn-start {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #f5a623, #e8941a);
+  color: #0f1b3d;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-start:hover {
+  opacity: 0.9;
+}

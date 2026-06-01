@@ -1,0 +1,90 @@
+.materials-page {
+  padding-bottom: 50px;
+}
+
+.materials-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.upload-form {
+  padding: 20px;
+}
+
+.materials-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+  padding: 20px;
+}
+
+.material-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  border: 1px solid #eef1f8;
+  border-radius: 12px;
+  background: #fafcff;
+}
+
+.mat-icon {
+  font-size: 32px;
+}
+
+.mat-info {
+  flex: 1;
+}
+
+.mat-info h4 {
+  margin: 0 0 5px 0;
+  color: #0f1b3d;
+  font-size: 16px;
+}
+
+.mat-badge {
+  display: inline-block;
+  background: #e2e8f0;
+  color: #475569;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  text-transform: uppercase;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.mat-info p {
+  margin: 0 0 5px 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.mat-info small {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.mat-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (min-width: 1024px) {
+  .materials-container {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  
+  .upload-card {
+    flex: 1;
+    position: sticky;
+    top: 20px;
+  }
+  
+  .list-card {
+    flex: 2;
+  }
+}

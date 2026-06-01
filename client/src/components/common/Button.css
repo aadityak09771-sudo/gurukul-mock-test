@@ -1,0 +1,59 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: 0.2s ease;
+}
+
+/* PRIMARY (GOLD) */
+.btn.primary {
+  background: linear-gradient(135deg, #f5a623, #e8941a);
+  color: #0f1b3d;
+}
+
+.btn.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(245,166,35,0.4);
+}
+
+/* NAVY */
+.btn.navy {
+  background: #0f1b3d;
+  color: white;
+}
+
+/* GREEN */
+.btn.green {
+  background: #22c55e;
+  color: white;
+}
+
+/* RED */
+.btn.red {
+  background: #ef4444;
+  color: white;
+}
+
+/* OUTLINE */
+.btn.outline {
+  background: transparent;
+  border: 2px solid #0f1b3d;
+  color: #0f1b3d;
+}
+
+/* SMALL BUTTON */
+.btn.sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+/* ICON */
+.btn-icon {
+  font-size: 14px;
+}

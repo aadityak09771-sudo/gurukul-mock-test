@@ -1,0 +1,527 @@
+/* ================= MAIN ================= */
+
+body{
+overflow-x:hidden;
+}
+
+.student-dashboard{
+padding:30px;
+background:#f0f2f8;
+min-height:100vh;
+box-sizing: border-box; /* CRITICAL FIX: prevents padding from pushing screen out */
+max-width: 100vw;
+}
+
+/* ================= NAVBAR ================= */
+
+.student-nav{
+height:64px;
+background:linear-gradient(135deg,#0f1b3d,#1a2a5e);
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:0 20px;
+flex-wrap:wrap;
+}
+
+.brand{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.brand-icon{
+background:#f5a623;
+padding:8px;
+border-radius:8px;
+}
+
+.brand-name{
+color:white;
+font-weight:700;
+font-size:15px;
+}
+
+.student-info{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.avatar{
+background:#f5a623;
+width:32px;
+height:32px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
+color:black;
+}
+
+.name{
+color:white;
+font-size:14px;
+}
+
+.btn-logout{
+background:rgba(255,255,255,0.15);
+color:white;
+border:none;
+padding:6px 12px;
+border-radius:8px;
+cursor:pointer;
+}
+
+/* ================= CONTENT ================= */
+
+.student-content{
+padding:20px;
+width:100%;
+box-sizing:border-box;
+}
+
+/* ================= WELCOME ================= */
+
+.welcome-banner{
+background:linear-gradient(135deg,#0f1b3d,#1a2a5e);
+color:white;
+padding:30px;
+border-radius:16px;
+text-align:center;
+margin-bottom:30px;
+}
+
+.welcome-banner h2{
+font-size:22px;
+margin-bottom:6px;
+}
+
+/* ================= SECTION LABEL ================= */
+
+.section-label{
+margin:25px 0 10px;
+font-size:13px;
+color:#8b93a7;
+font-weight:600;
+}
+
+/* ================= TEST GRID ================= */
+
+.tests-grid{
+display:grid;
+grid-template-columns:1fr;
+gap:20px;
+}
+
+/* ================= TEST CARD ================= */
+
+.test-card{
+background:white;
+padding:20px;
+border-radius:14px;
+box-shadow:0 4px 12px rgba(0,0,0,0.08);
+transition:0.2s;
+}
+
+.test-card:hover{
+transform:translateY(-2px);
+}
+
+.test-card h4{
+margin-bottom:6px;
+font-size:18px;
+}
+
+.meta{
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+font-size:13px;
+margin:10px 0;
+color:#555;
+}
+
+/* ================= BUTTON ================= */
+
+.btn-start{
+width:100%;
+padding:12px;
+background:#f59e0b;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-weight:600;
+font-size:14px;
+color:white;
+transition:0.2s;
+}
+
+.btn-start:hover{
+background:#d97706;
+}
+
+/* ================= BADGES ================= */
+
+.badge{
+margin-top:10px;
+padding:6px 10px;
+border-radius:8px;
+font-size:12px;
+width:fit-content;
+font-weight:600;
+}
+
+.badge.free{
+background:#d1fae5;
+color:#059669;
+}
+
+.badge.paid{
+background:#fee2e2;
+color:#dc2626;
+}
+
+/* ================= RESULTS ================= */
+
+.results-list{
+display:flex;
+flex-direction:column;
+gap:12px;
+}
+
+.result-item{
+background:white;
+padding:15px;
+border-radius:12px;
+display:flex;
+justify-content:space-between;
+gap:10px;
+box-shadow:0 3px 10px rgba(0,0,0,0.05);
+}
+
+.ri-info{
+flex:1;
+}
+
+.ri-score{
+text-align:right;
+}
+
+.ri-score .big{
+font-size:20px;
+font-weight:bold;
+}
+
+.ri-score .sub{
+font-size:12px;
+color:#8b93a7;
+}
+
+.view{
+font-size:12px;
+color:#f59e0b;
+cursor:pointer;
+font-weight:600;
+}
+
+/* ================= MOBILE ================= */
+
+@media(max-width:768px){
+
+.student-nav{
+padding:10px;
+}
+
+.brand-name{
+font-size:13px;
+}
+
+.welcome-banner{
+text-align:center;
+padding:20px;
+}
+
+.result-item{
+flex-direction:column;
+align-items:flex-start;
+}
+
+.ri-score{
+text-align:left;
+}
+
+}
+
+/* ================= SMALL MOBILE ================= */
+
+@media(max-width:480px){
+
+.student-dashboard{
+padding:15px;
+}
+
+.btn-start{
+font-size:14px;
+}
+
+.welcome-banner h2{
+font-size:18px;
+}
+
+  .history-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+}
+.hero-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.history-btn {
+  background: white;
+  color: #1e3a8a;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.history-btn:hover {
+  transform: scale(1.05);
+  background: #f1f5ff;
+}
+
+/* HISTORY */
+.history-section {
+  margin-top: 30px;
+}
+
+.history-card {
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.score.green {
+  color: #16a34a;
+  font-weight: bold;
+}
+
+.score.red {
+  color: #dc2626;
+  font-weight: bold;
+}
+/* ================= HERO ================= */
+
+.hero-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:50px 45px;
+}
+
+.hero-header h2{
+  font-size:42px;
+  margin-bottom:10px;
+  font-weight:800;
+}
+
+.hero-header p{
+  font-size:22px;
+  color:#dbeafe;
+  margin:0;
+}
+
+/* ================= SECTION TITLES ================= */
+
+.section-title{
+  margin:40px 0 20px;
+  font-size:24px;
+  font-weight:800;
+  color:#0f172a;
+}
+
+.paid-title{
+  margin-top:50px;
+}
+
+/* ================= TEST ROW ================= */
+
+.tests-row{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:22px;
+}
+
+/* ================= TEST CARD ================= */
+
+.modern-test-card{
+  background:white;
+  border-radius:22px;
+  padding:24px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.08);
+  transition:0.3s;
+  min-width:0;
+  box-sizing: border-box;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+
+.modern-test-card:hover{
+  transform:translateY(-8px);
+}
+
+.paid-card{
+  border:2px solid #f59e0b;
+}
+
+/* ================= CARD TOP ================= */
+
+.test-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:18px;
+  gap:10px;
+}
+
+.test-top h4{
+  font-size:20px;
+  font-weight:700;
+  margin:0;
+  color:#0f172a;
+  flex: 1;
+}
+
+/* ================= BADGES ================= */
+
+.free-badge{
+  background:#dcfce7;
+  color:#16a34a;
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+}
+
+.paid-badge{
+  background:#fff7ed;
+  color:#f97316;
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+}
+
+/* ================= META ================= */
+
+.test-meta{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-bottom:24px;
+  color:#475569;
+  font-size:15px;
+}
+
+/* ================= BUTTON ================= */
+
+.start-btn{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(135deg,#f59e0b,#ff7b00);
+  color:white;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.start-btn:hover{
+  transform:scale(1.03);
+}
+
+.premium-btn{
+  background:linear-gradient(135deg,#0f172a,#1e3a8a);
+}
+
+/* ================= EMPTY ================= */
+
+.empty-text{
+  color:#64748b;
+  font-size:16px;
+  margin-bottom:20px;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:1100px){
+
+  .tests-row{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+}
+
+@media(max-width:768px){
+
+  .hero-header{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:20px;
+  }
+
+  .hero-header h2{
+    font-size:30px;
+  }
+
+  .hero-header p{
+    font-size:18px;
+  }
+
+  .tests-row{
+    grid-template-columns:1fr;
+  }
+
+  .test-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .modern-test-card {
+    padding: 18px;
+  }
+
+  .hero-header {
+    padding: 30px 15px;
+  }
+
+}
+.hero-header > div{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+}
+
+.hero-header h2{
+  margin:0;
+  line-height:1.1;
+}
+
+.hero-header p{
+  margin-top:12px;
+  margin-left:6px;
+}

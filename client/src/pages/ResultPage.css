@@ -1,0 +1,251 @@
+/* ================= PAGE ================= */
+.result-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f1b3d, #1a2a5e);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+/* ================= CARD ================= */
+.result-card {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 800px;
+  padding: 30px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+/* ================= HEADER ================= */
+.r-head {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.r-icon {
+  font-size: 50px;
+  margin-bottom: 10px;
+}
+
+.r-head h2 {
+  font-size: 26px;
+  color: #0f1b3d;
+}
+
+.r-sub {
+  color: #8b93a7;
+  font-size: 14px;
+}
+
+/* ================= SCORE ================= */
+.overall-score {
+  background: linear-gradient(135deg, #0f1b3d, #2d1b6e);
+  border-radius: 14px;
+  padding: 25px;
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.score-main {
+  font-size: 55px;
+  font-weight: bold;
+  color: #f5a623;
+}
+
+.score-total {
+  color: rgba(255,255,255,0.6);
+  font-size: 16px;
+}
+
+.score-percent {
+  margin-top: 5px;
+  color: rgba(255,255,255,0.85);
+  font-size: 14px;
+}
+
+/* ================= SECTION SCORES ================= */
+.section-scores {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.ss-card {
+  padding: 18px;
+  border-radius: 12px;
+  text-align: center;
+  transition: 0.2s;
+}
+
+.ss-card:hover {
+  transform: translateY(-3px);
+}
+
+/* COLORS */
+.ss-card.verbal {
+  background: #ede9fe;
+}
+
+.ss-card.numerical {
+  background: #dbeafe;
+}
+
+.ss-card.reasoning {
+  background: #dcfce7;
+}
+
+.ss-title {
+  font-size: 12px;
+  font-weight: bold;
+  color: #555;
+}
+
+.ss-score {
+  font-size: 24px;
+  font-weight: bold;
+  color: #0f1b3d;
+}
+
+.ss-total {
+  font-size: 12px;
+  color: #8b93a7;
+}
+
+/* ================= NEW SECTION RESULT (DETAILED) ================= */
+.section-result {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+  margin-bottom: 25px;
+}
+
+.section-card {
+  background: #ffffff;
+  padding: 18px;
+  border-radius: 12px;
+  width: 200px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.1);
+  transition: 0.2s;
+}
+
+.section-card:hover {
+  transform: scale(1.05);
+}
+
+.section-card h4 {
+  margin-bottom: 10px;
+  color: #0f1b3d;
+}
+
+/* ================= ANSWER REVIEW ================= */
+.answer-review {
+  margin-top: 20px;
+}
+
+/* ================= BUTTONS ================= */
+.result-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 25px;
+}
+
+.btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+/* PRIMARY */
+.btn.primary {
+  background: #f5a623;
+  color: white;
+}
+
+.btn.primary:hover {
+  background: #e59400;
+}
+
+/* SECONDARY */
+.btn.secondary {
+  background: #eef1f8;
+  color: #0f1b3d;
+}
+
+.btn.secondary:hover {
+  background: #dde3f0;
+}
+
+/* ================= EXTRA BUTTON STYLE ================= */
+.result-buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.result-buttons button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #3498db;
+  color: white;
+  font-weight: 600;
+}
+
+.result-buttons button:hover {
+  background: #2c80b4;
+}
+
+/* ================= ANIMATION ================= */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 600px) {
+
+  .section-scores {
+    grid-template-columns: 1fr;
+  }
+
+  .section-result {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .result-card {
+    padding: 20px;
+  }
+
+  .score-main {
+    font-size: 40px;
+  }
+
+  .result-buttons,
+  .result-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .result-buttons button,
+  .btn {
+    width: 100%;
+  }
+}

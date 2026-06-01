@@ -1,0 +1,117 @@
+.question-box {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 25px;
+}
+
+/* HEADER */
+.q-header {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.q-number {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+}
+
+.q-marks {
+  background: rgba(245,166,35,0.2);
+  color: #f5a623;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+}
+
+/* QUESTION */
+.q-text {
+  font-size: 16px;
+  color: white;
+  margin-bottom: 20px;
+}
+
+/* OPTIONS */
+.options {
+  display: grid;
+  gap: 10px;
+}
+
+.option {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 10px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: 0.2s;
+}
+
+.option:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.option.selected {
+  background: rgba(245,166,35,0.2);
+  border-color: #f5a623;
+}
+
+/* LABEL */
+.option-label {
+  width: 30px;
+  height: 30px;
+  background: rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: white;
+}
+
+.option.selected .option-label {
+  background: #f5a623;
+  color: #0f1b3d;
+}
+
+/* TEXT */
+.option-text {
+  color: rgba(255,255,255,0.9);
+}
+
+/* ACTIONS */
+.q-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* BUTTONS */
+.btn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn.prev {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+.btn.next {
+  background: #f5a623;
+  color: #0f1b3d;
+}
+
+.btn.mark {
+  background: rgba(139,92,246,0.3);
+  color: #c4b5fd;
+}
+
+.btn.submit {
+  background: #22c55e;
+  color: white;
+  margin-left: auto;
+}

@@ -1,0 +1,60 @@
+.student-results {
+  padding: 30px;
+}
+
+table {
+  width: 100%;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+}
+
+thead {
+  background: #f5f7fb;
+}
+
+.green {
+  color: #16a34a;
+  font-weight: bold;
+}
+
+.red {
+  color: #dc2626;
+  font-weight: bold;
+}
+
+.btn-delete {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.student-link {
+  color: #2563eb;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.student-link:hover {
+  text-decoration: underline;
+}
+
+/* ================= MOBILE RESPONSIVENESS ================= */
+@media (max-width: 768px) {
+  .student-results {
+    padding: 15px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    min-width: 600px;
+  }
+}

@@ -1,0 +1,53 @@
+.payments-page {
+  padding: 20px;
+}
+
+.payments-table {
+  margin-top: 20px;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.table-header,
+.table-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  align-items: center;
+}
+
+.table-header {
+  background: #f4f6f8;
+  font-weight: bold;
+}
+
+.table-row:hover {
+  background: #f9f9f9;
+}
+
+.no-data {
+  text-align: center;
+  padding: 20px;
+  color: gray;
+}
+
+.status-ok {
+  color: green;
+  font-weight: bold;
+}
+
+.status-pending {
+  color: orange;
+  font-weight: bold;
+}
+
+.approve-btn {
+  background: green;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}

@@ -1,0 +1,202 @@
+.manage-tests {
+  padding: 30px;
+}
+
+/* HEADER */
+.page-header h2 {
+  font-size: 26px;
+  color: #0f1b3d;
+}
+
+.page-header p {
+  color: #8b93a7;
+  margin-bottom: 20px;
+}
+
+/* GRID */
+.tests-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* CARD */
+.test-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid #eef1f8;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  transition: 0.2s;
+  box-sizing: border-box;
+  word-wrap: break-word;
+}
+
+.test-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+/* HEADER */
+.tc-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.tc-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f1b3d;
+}
+
+/* STATUS */
+.status-badge {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+
+.status-badge.live {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.status-badge.draft {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* META */
+.tc-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: #8b93a7;
+  margin-bottom: 10px;
+}
+
+.tc-date {
+  font-size: 11px;
+  color: #8b93a7;
+  margin-bottom: 15px;
+}
+
+/* ACTIONS */
+.tc-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-green {
+  background: #22c55e;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid #0f1b3d;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-red {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* EMPTY */
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #8b93a7;
+}
+
+.empty-state .icon {
+  font-size: 40px;
+}
+
+.empty-state h3 {
+  color: #0f1b3d;
+}
+
+/* 🔥 LINK BOX */
+.tc-link {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.tc-link input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 12px;
+}
+
+.tc-link button {
+  padding: 6px 10px;
+  border: none;
+  background: #0f1b3d;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* 🔥 EXTRA BUTTON */
+.btn-blue {
+  background: #3b82f6;
+  color: white;
+}
+.status-badge.live{
+  background:#dcfce7;
+  color:#15803d;
+}
+
+.status-badge.upcoming{
+  background:#dbeafe;
+  color:#2563eb;
+}
+
+.status-badge.expired{
+  background:#fee2e2;
+  color:#dc2626;
+}
+
+.status-badge.draft{
+  background:#fef3c7;
+  color:#b45309;
+}
+
+.test-dates{
+  display:flex;
+  gap:20px;
+  margin-top:10px;
+  flex-wrap:wrap;
+  font-size:14px;
+  color:#666;
+}
+
+.disabled-btn{
+  opacity:.7;
+  cursor:not-allowed;
+}
+
+/* MOBILE PADDING ADJUSTMENT */
+@media (max-width: 768px) {
+  .manage-tests {
+    padding: 15px;
+  }
+}

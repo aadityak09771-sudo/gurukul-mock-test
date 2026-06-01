@@ -1,0 +1,127 @@
+.result-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f1b3d, #2d1b6e);
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+/* CARD */
+.result-card {
+  background: #ffffff;
+  border-radius: 20px;
+  max-width: 700px;
+  width: 100%;
+  padding: 30px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+/* HEADER */
+.r-head {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.r-icon {
+  font-size: 50px;
+  margin-bottom: 10px;
+}
+
+.r-head h2 {
+  font-size: 26px;
+  color: #0f1b3d;
+}
+
+.r-sub {
+  color: #8b93a7;
+  font-size: 14px;
+}
+
+/* SCORE */
+.overall-score {
+  background: linear-gradient(135deg, #0f1b3d, #1a2a5e);
+  border-radius: 14px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.score-main {
+  font-size: 50px;
+  color: #f5a623;
+  font-weight: bold;
+}
+
+.score-total {
+  color: rgba(255,255,255,0.6);
+}
+
+.score-percent {
+  color: rgba(255,255,255,0.8);
+  margin-top: 5px;
+}
+
+/* SECTION SCORES */
+.section-scores {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.ss-card {
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.ss-card.verbal {
+  background: #ede9fe;
+}
+
+.ss-card.numerical {
+  background: #dbeafe;
+}
+
+.ss-card.reasoning {
+  background: #dcfce7;
+}
+
+.ss-title {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.ss-score {
+  font-size: 22px;
+  font-weight: bold;
+  color: #0f1b3d;
+}
+
+.ss-total {
+  font-size: 12px;
+  color: #8b93a7;
+}
+
+/* ACTIONS */
+.result-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn.primary {
+  background: #f5a623;
+}
+
+.btn.secondary {
+  background: #eef1f8;
+}

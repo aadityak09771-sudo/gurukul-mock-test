@@ -1,0 +1,222 @@
+/* ================= PAGE CONTAINER ================= */
+.result-details-page {
+  padding: 10px;
+  max-width: 1100px;
+  margin: 0 auto;
+  font-family: 'DM Sans', 'Poppins', sans-serif;
+}
+
+/* ================= HEADER ================= */
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.result-header h2 {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f1b3d;
+  margin: 0;
+}
+
+/* ================= EXPORT BUTTONS ================= */
+.export-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.pdf-btn, .excel-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s ease;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pdf-btn {
+  background: #ef4444;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.pdf-btn:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+.excel-btn {
+  background: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.excel-btn:hover {
+  background: #059669;
+  transform: translateY(-2px);
+}
+
+/* ================= CARDS ================= */
+.info-card, .answers-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 26px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 24px rgba(15, 27, 61, 0.04);
+  border: 1px solid #eef1f8;
+}
+
+.info-card h3, .answers-card h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f1b3d;
+  margin-top: 0;
+  margin-bottom: 22px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid #eef1f8;
+}
+
+/* ================= INFO GRID ================= */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+}
+
+.info-grid div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.info-grid span {
+  font-size: 12px;
+  color: #8b93a7;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-grid p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a2140;
+}
+
+/* ================= STATUS BADGES ================= */
+.pass {
+  display: inline-block;
+  background: #dcfce7;
+  color: #16a34a;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.fail {
+  display: inline-block;
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+/* ================= SECTION TABLE ================= */
+.section-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+.section-table th, .section-table td {
+  padding: 16px;
+  text-align: left;
+  border-bottom: 1px solid #eef1f8;
+}
+
+.section-table th {
+  background: #f8faff;
+  color: #8b93a7;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.section-table td {
+  font-size: 15px;
+  color: #1a2140;
+  font-weight: 600;
+}
+
+.section-table tbody tr:hover {
+  background-color: #fcfcfd;
+}
+
+/* ================= ANSWERS LIST ================= */
+.answers-card {
+  gap: 16px;
+}
+
+.answer-box {
+  background: #f8faff;
+  border: 1px solid #eef1f8;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 16px;
+  transition: 0.2s ease;
+}
+
+.answer-box:hover {
+  border-color: #dbe2f2;
+  box-shadow: 0 4px 16px rgba(15, 27, 61, 0.03);
+}
+
+.answer-q {
+  font-size: 14px;
+  color: #8b93a7;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.answer-value {
+  font-size: 15px;
+  color: #0f1b3d;
+  font-weight: 600;
+  background: #ffffff;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #eef1f8;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 768px) {
+  .result-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .export-buttons {
+    width: 100%;
+    flex-direction: column;
+  }
+  
+  .pdf-btn, .excel-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}

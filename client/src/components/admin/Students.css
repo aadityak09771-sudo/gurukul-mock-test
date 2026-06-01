@@ -1,0 +1,153 @@
+.students-page {
+  padding: 30px;
+}
+
+/* HEADER */
+.page-header h2 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #0f1b3d;
+}
+
+.page-header p {
+  color: #8b93a7;
+  margin-bottom: 25px;
+}
+
+/* CARD */
+.students-card {
+  background: white;
+  border-radius: 18px;
+  padding: 25px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+}
+
+/* HEADER */
+.card-header {
+  margin-bottom: 20px;
+}
+
+.card-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f1b3d;
+}
+
+/* TABLE */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  padding: 12px;
+  font-size: 12px;
+  color: #8b93a7;
+  border-bottom: 2px solid #eef1f8;
+}
+
+td {
+  padding: 14px 12px;
+  font-size: 14px;
+  color: #0f1b3d;
+  border-bottom: 1px solid #eef1f8;
+}
+
+/* ROW HOVER */
+tr:hover {
+  background: #f9fafc;
+}
+
+/* STUDENT */
+.student-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  background: #eef1f8;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #0f1b3d;
+}
+
+/* TEST COUNT */
+.tests-count {
+  font-weight: 600;
+}
+
+/* SCORE */
+.pill {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.score-high {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.score-mid {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.score-low {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+/* EMPTY */
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #8b93a7;
+}
+
+.empty-state .icon {
+  font-size: 40px;
+}
+
+.empty-state h3 {
+  color: #0f1b3d;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  table {
+    font-size: 12px;
+  }
+
+  .avatar {
+    width: 26px;
+    height: 26px;
+  }
+}
+.btn-delete {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: 0.2s;
+}
+
+.btn-delete:hover {
+  background: #dc2626;
+  transform: scale(1.05);
+}

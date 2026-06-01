@@ -1,0 +1,28 @@
+.role-tabs {
+  display: flex;
+  gap: 8px;
+  background: var(--lightgray);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 25px;
+}
+
+.role-tab {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+/* ACTIVE TAB */
+.role-tab.active {
+  background: var(--white);
+  color: var(--navy);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}

@@ -1,0 +1,91 @@
+.result-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+}
+
+/* HEADER */
+.rc-head {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.rc-icon {
+  font-size: 50px;
+  margin-bottom: 10px;
+}
+
+.rc-head h2 {
+  font-size: 24px;
+  color: #0f1b3d;
+}
+
+.rc-sub {
+  font-size: 14px;
+  color: #8b93a7;
+}
+
+/* SCORE */
+.rc-score {
+  background: linear-gradient(135deg, #0f1b3d, #1a2a5e);
+  padding: 20px;
+  border-radius: 14px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.rc-main {
+  font-size: 45px;
+  font-weight: bold;
+  color: #f5a623;
+}
+
+.rc-total {
+  color: rgba(255,255,255,0.6);
+}
+
+.rc-percent {
+  color: rgba(255,255,255,0.8);
+}
+
+/* SECTIONS */
+.rc-sections {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.rc-box {
+  text-align: center;
+  padding: 12px;
+  border-radius: 10px;
+}
+
+.rc-box span {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.rc-box h3 {
+  font-size: 20px;
+  color: #0f1b3d;
+}
+
+.rc-box p {
+  font-size: 12px;
+  color: #8b93a7;
+}
+
+/* COLORS */
+.rc-box.verbal {
+  background: #ede9fe;
+}
+
+.rc-box.numerical {
+  background: #dbeafe;
+}
+
+.rc-box.reasoning {
+  background: #dcfce7;
+}
