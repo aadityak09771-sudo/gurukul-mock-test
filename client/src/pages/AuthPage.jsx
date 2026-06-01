@@ -80,7 +80,7 @@ const AuthPage = () => {
               Gurukul Success Classes
             </h3>
 
-            <p className="brand-tagline">
+            <p className="brand-tagline" style={{ color: "#1e3a8a", fontWeight: "bold" }}>
               Aptitude Today, Success Tomorrow
             </p>
 
