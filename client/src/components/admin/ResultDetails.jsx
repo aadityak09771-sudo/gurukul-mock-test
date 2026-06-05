@@ -458,6 +458,17 @@ const ResultDetails = () => {
       <div className="answers-card">
 
         <h3>Detailed Answers</h3>
+        
+        <style>{`
+          .rich-text-content p {
+            margin: 0;
+            display: inline-block;
+          }
+          .rich-text-content img {
+            max-width: 100%;
+            height: auto;
+          }
+        `}</style>
 
         {
           result.testId && result.testId.sections ? (
@@ -473,9 +484,9 @@ const ResultDetails = () => {
                   if (q.type === "written") {
                     return (
                       <div key={qIndex} style={{ marginBottom: "15px", padding: "15px", border: "1px solid #e2e8f0", borderRadius: "8px", background: "#f8fafc" }}>
-                        <p style={{ fontWeight: "bold", margin: "0 0 10px 0", fontSize: "15px" }}>
-                          Q (Written): {q.q} <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "normal" }}>[+{qMarksCorrect}, -{qMarksNegative} Marks]</span>
-                        </p>
+                        <div style={{ fontWeight: "bold", margin: "0 0 10px 0", fontSize: "15px", display: "flex", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
+                          Q (Written): <div dangerouslySetInnerHTML={{ __html: q.q }} className="rich-text-content" /> <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "normal" }}>[+{qMarksCorrect}, -{qMarksNegative} Marks]</span>
+                        </div>
                         {q.questionImage && (
                           <div style={{ margin: "10px 0" }}>
                             <img src={q.questionImage} alt="Question Figure" style={{ maxWidth: "100%", maxHeight: "300px", borderRadius: "8px", border: "1px solid #e2e8f0" }} />
@@ -491,9 +502,9 @@ const ResultDetails = () => {
                   const isCorrect = chosen === q.correct;
                   return (
                     <div key={qIndex} style={{ marginBottom: "15px", padding: "15px", border: "1px solid #e2e8f0", borderRadius: "8px", background: "#f8fafc" }}>
-                      <p style={{ fontWeight: "bold", margin: "0 0 10px 0", fontSize: "15px" }}>
-                        Q: {q.q} <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "normal" }}>[+{qMarksCorrect}, -{qMarksNegative} Marks]</span>
-                      </p>
+                      <div style={{ fontWeight: "bold", margin: "0 0 10px 0", fontSize: "15px", display: "flex", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
+                        Q: <div dangerouslySetInnerHTML={{ __html: q.q }} className="rich-text-content" /> <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "normal" }}>[+{qMarksCorrect}, -{qMarksNegative} Marks]</span>
+                      </div>
                       {q.questionImage && (
                         <div style={{ margin: "10px 0" }}>
                           <img src={q.questionImage} alt="Question Figure" style={{ maxWidth: "100%", maxHeight: "300px", borderRadius: "8px", border: "1px solid #e2e8f0" }} />
@@ -518,8 +529,11 @@ const ResultDetails = () => {
                         }
                         
                         return (
-                          <div key={optKey} style={{ padding: "8px 12px", margin: "4px 0", borderRadius: "6px", backgroundColor: bgColor, color: color, fontWeight: fw, border: border, display: "flex", justifyContent: "space-between" }}>
-                            <span>{optKey}. {optVal}</span>
+                          <div key={optKey} style={{ padding: "8px 12px", margin: "4px 0", borderRadius: "6px", backgroundColor: bgColor, color: color, fontWeight: fw, border: border, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <span style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                              <span>{optKey}.</span>
+                              <span dangerouslySetInnerHTML={{ __html: optVal }} className="rich-text-content" />
+                            </span>
                             <span>{optKey === q.correct ? "✅" : (chosen === optKey ? "❌" : "")}</span>
                           </div>
                         );

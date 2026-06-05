@@ -324,6 +324,10 @@ const ResultPage = ({ result: propResult }) => {
             margin: 0;
             display: inline-block;
           }
+          .rich-text-content img {
+            max-width: 100%;
+            height: auto;
+          }
         `}</style>
         {result.testId && result.testId.sections ? (
           result.testId.sections.map((sec, secIndex) => (

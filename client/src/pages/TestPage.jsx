@@ -1234,6 +1234,10 @@ return (
       .question-text p {
         margin: 0 0 10px 0;
       }
+      .question-text img, .option img {
+        max-width: 100%;
+        height: auto;
+      }
     `}</style>
 
     {/* LEFT PANEL */}

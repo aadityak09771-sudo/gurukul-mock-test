@@ -515,10 +515,10 @@ if (
     questionImage: q.questionImage || "",
     type: q.type,
     options: {
-      A: q.options.A,
-      B: q.options.B,
-      C: q.options.C,
-      D: q.options.D,
+      A: q.options?.A || "",
+      B: q.options?.B || "",
+      C: q.options?.C || "",
+      D: q.options?.D || "",
     },
 
     correct: q.correct,
