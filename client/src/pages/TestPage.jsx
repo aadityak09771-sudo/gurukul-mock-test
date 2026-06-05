@@ -1197,18 +1197,37 @@ const currentQ = questions[current] || {};
 const originalSecIdx = currentSection?.originalSecIdx ?? sectionIndex;
 const currentKey = `${originalSecIdx}-${currentQ?.originalIndex ?? current}`;
 
-const answered = Object.keys(answers).filter(k => answers[k]).length;
-const marked = Object.keys(review).length;
+const answeredCount = Object.keys(answers).filter(k => answers[k] && !review[k]).length;
+const markedCount = Object.keys(review).filter(k => review[k] && !answers[k]).length;
+const answeredMarkedCount = Object.keys(answers).filter(k => answers[k] && review[k]).length;
 const totalQuestions = sections.reduce(
   (acc, sec) => acc + sec.questions.length,
   0
 );
 
-const notAnswered =
-  Math.max(totalQuestions - answered, 0);
+const notAnsweredCount = Math.max(totalQuestions - answeredCount - markedCount - answeredMarkedCount, 0);
 
 return (
   <div className="exam-container">
+
+    <style>{`
+      .q-box.answered-marked {
+        background: #9333ea !important;
+        color: white !important;
+        position: relative;
+      }
+      .q-box.answered-marked::after {
+        content: '';
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        width: 8px;
+        height: 8px;
+        background: #22c55e;
+        border-radius: 50%;
+        border: 1px solid white;
+      }
+    `}</style>
 
     {/* LEFT PANEL */}
     <div className="left-panel">
@@ -1223,12 +1242,9 @@ return (
             <div
               key={i}
               className={`q-box
-                ${answers[key] ? "answered" : ""}
-                ${
-                  review[key] && !answers[key]
-                    ? "marked"
-                    : ""
-                }
+                ${answers[key] && review[key] ? "answered-marked" : ""}
+                ${answers[key] && !review[key] ? "answered" : ""}
+                ${!answers[key] && review[key] ? "marked" : ""}
                 ${current === i ? "active" : ""}
               `}
              onClick={() => {
@@ -1249,9 +1265,10 @@ return (
       </div>
 
       <div className="legend">
-        <p>✅ Answered: {answered}</p>
-        <p>🟪 Marked: {marked}</p>
-        <p>⬜ Not Answered: {notAnswered}</p>
+        <p>✅ Answered: {answeredCount}</p>
+        <p>🟪 Marked: {markedCount}</p>
+        <p>🟣 Answered & Marked: {answeredMarkedCount}</p>
+        <p>⬜ Not Answered: {notAnsweredCount}</p>
         <p style={{ marginTop: '10px', fontWeight: 'bold' }}>🎯 Total Marks: {totalMarksCalc}</p>
       </div>
     </div>
@@ -1506,7 +1523,7 @@ return (
           const key = `${originalSecIdx}-${currentQ?.originalIndex ?? current}`;
           setReview(prev => ({
           ...prev,
-          [key]: !answers[key]
+          [key]: true
         }));
           setCurrent(current + 1);
         }}>
@@ -1520,6 +1537,11 @@ return (
           setAnswers(prev => {
             const updated = { ...prev, [key]: null };
             answersRef.current = updated;
+            return updated;
+          });
+          setReview(prev => {
+            const updated = { ...prev };
+            delete updated[key];
             return updated;
           });
         }}>
@@ -1536,19 +1558,13 @@ return (
           const originalSecIdx = sections[sectionIndex]?.originalSecIdx ?? sectionIndex;
           const key = `${originalSecIdx}-${currentQ?.originalIndex ?? current}`;
 
-              if (answers[key]) {
-
-                setReview(prev => {
-
-                  const updated = { ...prev };
-
-                  delete updated[key];
-
-                  return updated;
-
-                });
-
-              }
+          // Automatically clear the review mark when "Save & Next" is pressed
+          setReview(prev => {
+            const updated = { ...prev };
+            delete updated[key];
+            return updated;
+          });
+          
           const next = current + 1;
 
           if (next < questions.length) {
@@ -1727,9 +1743,10 @@ return (
           {popup === "summary" && (
             <>
               <h3>Submit Test?</h3>
-              <p>Answered: {answered}</p>
-              <p>Not Answered: {notAnswered}</p>
-              <p>Marked: {marked}</p>
+              <p>Answered: {answeredCount}</p>
+              <p>Answered & Marked (Evaluated): {answeredMarkedCount}</p>
+              <p>Marked for Review (Unanswered): {markedCount}</p>
+              <p>Not Answered: {notAnsweredCount}</p>
 
               <div className="popup-actions">
                 <button onClick={() => setPopup(null)}>Cancel</button>
