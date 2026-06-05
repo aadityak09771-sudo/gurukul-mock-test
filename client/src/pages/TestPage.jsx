@@ -1227,6 +1227,13 @@ return (
         border-radius: 50%;
         border: 1px solid white;
       }
+      .option p {
+        margin: 0;
+        display: inline-block;
+      }
+      .question-text p {
+        margin: 0 0 10px 0;
+      }
     `}</style>
 
     {/* LEFT PANEL */}

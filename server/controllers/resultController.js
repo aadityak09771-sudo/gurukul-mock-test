@@ -64,6 +64,45 @@ const getPieSlice = (cx, cy, r, startAngle, endAngle) => {
   return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
 };
 
+// Helper Function: Convert HTML to Plain Text while preserving Math scripts
+const htmlToPlainText = (html) => {
+  if (!html) return "";
+  let text = html.toString();
+  
+  const superscripts = {
+    '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
+    '+': '⁺', '-': '⁻', '=': '⁼', '(': '⁽', ')': '⁾', 'n': 'ⁿ', 'i': 'ⁱ', 'x': 'ˣ', 'y': 'ʸ'
+  };
+  text = text.replace(/<sup[^>]*>(.*?)<\/sup>/gi, (match, p1) => {
+    return p1.replace(/<[^>]+>/g, '').split('').map(c => superscripts[c] || c).join('');
+  });
+
+  const subscripts = {
+    '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉',
+    '+': '₊', '-': '₋', '=': '₌', '(': '₍', ')': '₎', 'a': 'ₐ', 'e': 'ₑ', 'o': 'ₒ', 'x': 'ₓ'
+  };
+  text = text.replace(/<sub[^>]*>(.*?)<\/sub>/gi, (match, p1) => {
+    return p1.replace(/<[^>]+>/g, '').split('').map(c => subscripts[c] || c).join('');
+  });
+
+  text = text.replace(/<br\s*\/?>/gi, '\n');
+  text = text.replace(/<\/p>/gi, '\n');
+  text = text.replace(/<\/div>/gi, '\n');
+  
+  text = text.replace(/<[^>]+>/g, '');
+  
+  text = text.replace(/&nbsp;/g, ' ');
+  text = text.replace(/&lt;/g, '<');
+  text = text.replace(/&gt;/g, '>');
+  text = text.replace(/&amp;/g, '&');
+  text = text.replace(/&quot;/g, '"');
+  text = text.replace(/&#39;/g, "'");
+  
+  text = text.replace(/\n\s*\n/g, '\n').trim();
+  
+  return text;
+};
+
 // ================= SUBMIT RESULT =================
 exports.submitResult = async (req, res) => {
   try {
@@ -933,7 +972,7 @@ exports.exportStudentPDF = async (req, res) => {
           doc.fontSize(14);
 
           doc.text(
-            `Q${index + 1}: ${(q.question || "").replace(/<[^>]+>/g, '')}`
+            `Q${index + 1}: ${htmlToPlainText(q.question)}`
           );
 
           let qImage = null;
@@ -1002,7 +1041,7 @@ exports.exportStudentPDF = async (req, res) => {
             const qMarksCorrect = q.marksCorrect !== undefined && q.marksCorrect !== null ? q.marksCorrect : (test.marksCorrect || 4);
             const qMarksNegative = q.marksNegative !== undefined && q.marksNegative !== null ? q.marksNegative : (test.marksNegative || 1);
 
-            doc.fontSize(12).fillColor('black').text(`Q: ${(q.q || "").replace(/<[^>]+>/g, '')} [+${qMarksCorrect}, -${qMarksNegative}]`);
+            doc.fontSize(12).fillColor('black').text(`Q: ${htmlToPlainText(q.q)} [+${qMarksCorrect}, -${qMarksNegative}]`);
 
             if (q.questionImage) {
               try {
@@ -1027,7 +1066,7 @@ exports.exportStudentPDF = async (req, res) => {
             if (q.options) {
               doc.moveDown(0.3);
               Object.entries(q.options).forEach(([k, v]) => {
-                const plainTextV = (v || "").replace(/<[^>]+>/g, '');
+                const plainTextV = htmlToPlainText(v);
                 if (k === q.correct) {
                   doc.fillColor('green').text(`  ${k}. ${plainTextV} [Correct Answer]`);
                 } else if (chosen === k && chosen !== q.correct) {
@@ -1260,12 +1299,12 @@ exports.exportStudentExcel = async (
           if (q.type === 'written') {
             const writtenAnsObj = result.writtenAnswers?.find(wa => wa.question === q.q);
             const writtenAns = writtenAnsObj ? writtenAnsObj.answer : (chosen || 'Not Answered');
-            rowData = [sec.name, `${(q.q || "").replace(/<[^>]+>/g, '')} [+${qMarksCorrect}, -${qMarksNegative}]`, writtenAns, '(Written)', '(Manual Check)', ''];
+            rowData = [sec.name, `${htmlToPlainText(q.q)} [+${qMarksCorrect}, -${qMarksNegative}]`, writtenAns, '(Written)', '(Manual Check)', ''];
           } else {
             const isCorrect = chosen === q.correct;
-            const correctText = q.correct && q.options ? `${q.correct}: ${(q.options[q.correct] || "").replace(/<[^>]+>/g, '')}` : 'N/A';
-            const chosenText = chosen && q.options ? `${chosen}: ${(q.options[chosen] || "").replace(/<[^>]+>/g, '')}` : 'Not Attempted';
-            rowData = [sec.name, `${(q.q || "").replace(/<[^>]+>/g, '')} [+${qMarksCorrect}, -${qMarksNegative}]`, chosenText, correctText, chosen ? (isCorrect ? 'Correct' : 'Wrong') : 'Unattempted', ''];
+            const correctText = q.correct && q.options ? `${q.correct}: ${htmlToPlainText(q.options[q.correct])}` : 'N/A';
+            const chosenText = chosen && q.options ? `${chosen}: ${htmlToPlainText(q.options[chosen])}` : 'Not Attempted';
+            rowData = [sec.name, `${htmlToPlainText(q.q)} [+${qMarksCorrect}, -${qMarksNegative}]`, chosenText, correctText, chosen ? (isCorrect ? 'Correct' : 'Wrong') : 'Unattempted', ''];
           }
           const dataRow = sheet.addRow(rowData);
           dataRow.eachCell((cell) => {
@@ -1480,7 +1519,7 @@ const generateEmailHTML = (result, test) => {
               } else if (chosen === k && chosen !== q.correct) {
                 bgColor = "#fee2e2"; color = "#991b1b"; fw = "bold"; border = "1px solid #ef4444";
               }
-              html += `<div style="padding: 8px 12px; margin: 4px 0; border-radius: 6px; background-color: ${bgColor}; color: ${color}; font-weight: ${fw}; border: ${border}; display: flex; justify-content: space-between;"><span>${k}. ${v}</span><span>${k === q.correct ? "✅" : (chosen === k ? "❌" : "")}</span></div>`;
+            html += `<div style="padding: 8px 12px; margin: 4px 0; border-radius: 6px; background-color: ${bgColor}; color: ${color}; font-weight: ${fw}; border: ${border}; display: flex; justify-content: space-between; align-items: center;"><div style="display: flex; gap: 8px; align-items: center;"><strong>${k}.</strong> <div style="margin: 0; padding: 0;">${(v || "").replace(/<p>/g, '<p style="margin: 0; display: inline;">')}</div></div><span>${k === q.correct ? "✅" : (chosen === k ? "❌" : "")}</span></div>`;
             });
           }
 
