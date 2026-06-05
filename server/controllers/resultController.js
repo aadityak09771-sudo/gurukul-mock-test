@@ -933,7 +933,7 @@ exports.exportStudentPDF = async (req, res) => {
           doc.fontSize(14);
 
           doc.text(
-            `Q${index + 1}: ${q.question}`
+            `Q${index + 1}: ${(q.question || "").replace(/<[^>]+>/g, '')}`
           );
 
           let qImage = null;
@@ -1002,7 +1002,7 @@ exports.exportStudentPDF = async (req, res) => {
             const qMarksCorrect = q.marksCorrect !== undefined && q.marksCorrect !== null ? q.marksCorrect : (test.marksCorrect || 4);
             const qMarksNegative = q.marksNegative !== undefined && q.marksNegative !== null ? q.marksNegative : (test.marksNegative || 1);
 
-            doc.fontSize(12).fillColor('black').text(`Q: ${q.q} [+${qMarksCorrect}, -${qMarksNegative}]`);
+            doc.fontSize(12).fillColor('black').text(`Q: ${(q.q || "").replace(/<[^>]+>/g, '')} [+${qMarksCorrect}, -${qMarksNegative}]`);
 
             if (q.questionImage) {
               try {
@@ -1027,12 +1027,13 @@ exports.exportStudentPDF = async (req, res) => {
             if (q.options) {
               doc.moveDown(0.3);
               Object.entries(q.options).forEach(([k, v]) => {
+                const plainTextV = (v || "").replace(/<[^>]+>/g, '');
                 if (k === q.correct) {
-                  doc.fillColor('green').text(`  ${k}. ${v} [Correct Answer]`);
+                  doc.fillColor('green').text(`  ${k}. ${plainTextV} [Correct Answer]`);
                 } else if (chosen === k && chosen !== q.correct) {
-                  doc.fillColor('red').text(`  ${k}. ${v} [Your Answer]`);
+                  doc.fillColor('red').text(`  ${k}. ${plainTextV} [Your Answer]`);
                 } else {
-                  doc.fillColor('black').text(`  ${k}. ${v}`);
+                  doc.fillColor('black').text(`  ${k}. ${plainTextV}`);
                 }
               });
             }
@@ -1259,12 +1260,12 @@ exports.exportStudentExcel = async (
           if (q.type === 'written') {
             const writtenAnsObj = result.writtenAnswers?.find(wa => wa.question === q.q);
             const writtenAns = writtenAnsObj ? writtenAnsObj.answer : (chosen || 'Not Answered');
-            rowData = [sec.name, `${q.q} [+${qMarksCorrect}, -${qMarksNegative}]`, writtenAns, '(Written)', '(Manual Check)', ''];
+            rowData = [sec.name, `${(q.q || "").replace(/<[^>]+>/g, '')} [+${qMarksCorrect}, -${qMarksNegative}]`, writtenAns, '(Written)', '(Manual Check)', ''];
           } else {
             const isCorrect = chosen === q.correct;
-            const correctText = q.correct && q.options ? `${q.correct}: ${q.options[q.correct]}` : 'N/A';
-            const chosenText = chosen && q.options ? `${chosen}: ${q.options[chosen]}` : 'Not Attempted';
-            rowData = [sec.name, `${q.q} [+${qMarksCorrect}, -${qMarksNegative}]`, chosenText, correctText, chosen ? (isCorrect ? 'Correct' : 'Wrong') : 'Unattempted', ''];
+            const correctText = q.correct && q.options ? `${q.correct}: ${(q.options[q.correct] || "").replace(/<[^>]+>/g, '')}` : 'N/A';
+            const chosenText = chosen && q.options ? `${chosen}: ${(q.options[chosen] || "").replace(/<[^>]+>/g, '')}` : 'Not Attempted';
+            rowData = [sec.name, `${(q.q || "").replace(/<[^>]+>/g, '')} [+${qMarksCorrect}, -${qMarksNegative}]`, chosenText, correctText, chosen ? (isCorrect ? 'Correct' : 'Wrong') : 'Unattempted', ''];
           }
           const dataRow = sheet.addRow(rowData);
           dataRow.eachCell((cell) => {
@@ -1454,7 +1455,7 @@ const generateEmailHTML = (result, test) => {
            const writtenAns = result.writtenAnswers?.find(wa => wa.question === q.q)?.answer || chosen || 'Not Answered';
            html += `
             <div style="margin-bottom: 15px; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc;">
-              <p style="margin: 0 0 10px 0; font-size: 15px;"><strong>Q (Written):</strong> ${q.q} <span style="font-size: 12px; color: #64748b;">[+${qMarksCorrect}, -${qMarksNegative}]</span></p>
+              <div style="margin: 0 0 10px 0; font-size: 15px;"><strong>Q (Written):</strong> <div>${q.q}</div> <span style="font-size: 12px; color: #64748b;">[+${qMarksCorrect}, -${qMarksNegative}]</span></div>
               ${q.questionImage ? `<img src="${q.questionImage}" alt="Question Image" style="max-width: 100%; max-height: 300px; border-radius: 8px; margin-bottom: 10px;" />` : ''}
               <p style="margin: 5px 0; color: #475569;"><strong>Your Answer:</strong> ${writtenAns}</p>
             </div>
@@ -1463,7 +1464,7 @@ const generateEmailHTML = (result, test) => {
           const isCorrect = chosen === q.correct;
           html += `
             <div style="margin-bottom: 15px; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc;">
-              <p style="margin: 0 0 10px 0; font-size: 15px;"><strong>Q:</strong> ${q.q} <span style="font-size: 12px; color: #64748b;">[+${qMarksCorrect}, -${qMarksNegative}]</span></p>
+              <div style="margin: 0 0 10px 0; font-size: 15px;"><strong>Q:</strong> <div>${q.q}</div> <span style="font-size: 12px; color: #64748b;">[+${qMarksCorrect}, -${qMarksNegative}]</span></div>
               ${q.questionImage ? `<img src="${q.questionImage}" alt="Question Image" style="max-width: 100%; max-height: 300px; border-radius: 8px; margin-bottom: 10px;" />` : ''}
             </div>
           `;
@@ -1497,7 +1498,7 @@ const generateEmailHTML = (result, test) => {
      result.writtenAnswers.forEach((q, index) => {
        html += `
           <div style="margin-bottom: 15px; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc;">
-            <p style="margin: 0 0 10px 0; font-size: 15px;"><strong>Q${index + 1}:</strong> ${q.question}</p>
+            <div style="margin: 0 0 10px 0; font-size: 15px;"><strong>Q${index + 1}:</strong> <div>${q.question}</div></div>
             <p style="margin: 5px 0; color: #475569;"><strong>Your Answer:</strong> ${q.answer}</p>
           </div>
        `;

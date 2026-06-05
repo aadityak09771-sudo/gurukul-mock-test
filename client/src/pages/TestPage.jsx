@@ -1433,7 +1433,11 @@ return (
           </div>
         )}
         
-        <p>{currentQ?.q}</p>
+        <div 
+          className="question-text" 
+          dangerouslySetInnerHTML={{ __html: currentQ?.q || "" }} 
+          style={{ fontSize: "16px", marginBottom: "15px", lineHeight: "1.6" }} 
+        />
 
         {/* MCQ MODE */}
 {test?.examMode !== "written" && (
@@ -1449,7 +1453,7 @@ return (
     >
       <strong>{letter}.</strong>
 
-      {currentQ?.options?.[letter]}
+      <span dangerouslySetInnerHTML={{ __html: currentQ?.options?.[letter] || "" }} />
     </div>
   ))
 )}

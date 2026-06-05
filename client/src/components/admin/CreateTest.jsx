@@ -5,6 +5,26 @@ import React, {
 import { createTest } from "../../services/testService";
 import "./CreateTest.css";
 import API from "../../services/api";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+
+const MAIN_MODULES = {
+  toolbar: [
+    [{ 'header': [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ 'script': 'sub'}, { 'script': 'super' }],
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    ['image', 'clean']
+  ]
+};
+
+const OPTION_MODULES = {
+  toolbar: [
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ 'script': 'sub' }, { 'script': 'super' }],
+    ['image', 'clean']
+  ]
+};
 
 const CreateTest = ({
   editMode = false,
@@ -192,16 +212,19 @@ const [editingQIndex, setEditingQIndex] = useState(null);
 
   const [q, setQ] = useState("");
   const [qImage, setQImage] = useState("");
-  const [A, setA] = useState("");
-  const [B, setB] = useState("");
-  const [C, setC] = useState("");
-  const [D, setD] = useState("");
+  const [options, setOptions] = useState({ A: "", B: "", C: "", D: "" });
   const [correct, setCorrect] = useState("");
   const [qMarksCorrect, setQMarksCorrect] = useState("");
   const [qMarksNegative, setQMarksNegative] = useState("");
 
   const [loading, setLoading] = useState(false);
-  //section timer 
+  const [activeToolbar, setActiveToolbar] = useState(null);
+
+  const handleOptionChange = (value, optionKey) => {
+    setOptions(prev => ({ ...prev, [optionKey]: value }));
+  };
+
+  //section timer
   const updateSectionName = (index, value) => {
 
   const updated = [...sections];
@@ -286,7 +309,7 @@ const removeCustomField = (
 
     if (
       !currentIsWritten &&
-      (!A || !B || !C || !D || !correct)
+      (!options.A || !options.B || !options.C || !options.D || !correct)
     ) {
 
       alert("Fill MCQ fields ❌");
@@ -312,7 +335,7 @@ const removeCustomField = (
 options:
   currentIsWritten
     ? {}
-    : { A, B, C, D },
+    : options,
    correct:
   currentIsWritten
     ? ""
@@ -338,14 +361,12 @@ options:
 
   setQ("");
   setQImage("");
-  setA("");
-  setB("");
-  setC("");
-  setD("");
+  setOptions({ A: "", B: "", C: "", D: "" });
   setCorrect("");
   setCurrentQTime("");
   setQMarksCorrect("");
   setQMarksNegative("");
+  setActiveToolbar(null);
 };
 
   // ================= EDIT QUESTION =================
@@ -356,10 +377,12 @@ options:
     
     setQ(questionToEdit.q);
     setQImage(questionToEdit.questionImage || "");
-    setA(questionToEdit.options?.A || "");
-    setB(questionToEdit.options?.B || "");
-    setC(questionToEdit.options?.C || "");
-    setD(questionToEdit.options?.D || "");
+    setOptions({
+      A: questionToEdit.options?.A || "",
+      B: questionToEdit.options?.B || "",
+      C: questionToEdit.options?.C || "",
+      D: questionToEdit.options?.D || ""
+    });
     setCorrect(questionToEdit.correct || "");
     setCurrentQTime(questionToEdit.time || "");
     setQMarksCorrect(questionToEdit.marksCorrect !== null && questionToEdit.marksCorrect !== undefined ? questionToEdit.marksCorrect : "");
@@ -369,6 +392,7 @@ options:
     } else {
       setMixedQType("mcq");
     }
+    setActiveToolbar(null);
 
     document.querySelector('.question-input-area')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
@@ -386,14 +410,12 @@ options:
       setEditingQIndex(null);
       setQ("");
       setQImage("");
-      setA("");
-      setB("");
-      setC("");
-      setD("");
+      setOptions({ A: "", B: "", C: "", D: "" });
       setCorrect("");
       setCurrentQTime("");
       setQMarksCorrect("");
       setQMarksNegative("");
+      setActiveToolbar(null);
   }
 };
    // ✅ ADD SECTION
@@ -1418,7 +1440,17 @@ student2@gmail.com`}
             </select>
           </div>
         )}
-        <textarea placeholder="Question" value={q} onChange={e => setQ(e.target.value)} />
+        
+        <div style={{ marginBottom: "15px", backgroundColor: "white", borderRadius: "8px" }}>
+          <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold", color: "#334155" }}>Question (Supports pasting from MS Word, Images, Math Symbols):</label>
+          <ReactQuill 
+            theme="snow" 
+            value={q} 
+            onChange={setQ} 
+            placeholder="Type or paste your question here..."
+            modules={MAIN_MODULES}
+          />
+        </div>
         <div style={{ display: "flex", gap: "10px", marginTop: "10px", marginBottom: "10px" }}>
           <input 
             type="text" 
@@ -1473,45 +1505,125 @@ student2@gmail.com`}
 
   <>
 
-    <div className="option-grid">
+    <div className="option-grid-rich">
+      {["A", "B", "C", "D"].map(opt => (
+        <div 
+          className={`rich-opt-box ${activeToolbar === opt ? 'show-toolbar' : 'hide-toolbar'}`} 
+          key={opt} 
+        >
+          <div style={{ display: 'flex', alignItems: 'flex-start', width: '100%' }}>
+            <span style={{ 
+              marginRight: '15px', 
+              flexShrink: 0, 
+              marginTop: '8px', 
+              width: '36px', 
+              height: '36px', 
+              backgroundColor: '#2563eb', 
+              color: 'white', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              borderRadius: '8px',
+              fontWeight: 'bold',
+              fontSize: '16px',
+              boxShadow: '0 2px 4px rgba(37,99,235,0.2)'
+            }}>
+              {opt}
+            </span>
+            
+            <div style={{ flex: 1, minWidth: 0 }} className="quill-wrapper">
+              <ReactQuill
+                theme="snow"
+                value={options[opt]}
+                onChange={(value) => handleOptionChange(value, opt)}
+                placeholder={`Option ${opt} text...`}
+                modules={OPTION_MODULES}
+              />
+            </div>
 
-      <div className="option-box">
-        <span>A</span>
-        <input
-          placeholder="Option A"
-          value={A}
-          onChange={(e) => setA(e.target.value)}
-        />
-      </div>
-
-      <div className="option-box">
-        <span>B</span>
-        <input
-          placeholder="Option B"
-          value={B}
-          onChange={(e) => setB(e.target.value)}
-        />
-      </div>
-
-      <div className="option-box">
-        <span>C</span>
-        <input
-          placeholder="Option C"
-          value={C}
-          onChange={(e) => setC(e.target.value)}
-        />
-      </div>
-
-      <div className="option-box">
-        <span>D</span>
-        <input
-          placeholder="Option D"
-          value={D}
-          onChange={(e) => setD(e.target.value)}
-        />
-      </div>
-
+            <button
+              type="button"
+              onClick={() => setActiveToolbar(activeToolbar === opt ? null : opt)}
+              style={{
+                width: '32px', height: '32px', borderRadius: '50%',
+                background: 'transparent',
+                color: '#64748b', border: 'none', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '18px', transition: 'transform 0.3s ease',
+                transform: activeToolbar === opt ? 'rotate(180deg)' : 'rotate(0deg)',
+                marginLeft: '10px', flexShrink: 0, marginTop: '8px'
+              }}
+              title="Toggle Formatting Tools"
+            >
+              ▼
+            </button>
+          </div>
+        </div>
+      ))}
     </div>
+    <style>{`
+    .option-grid-rich {
+      display: grid;
+      grid-template-columns: 1fr; /* Full width so toolbar fits perfectly */
+      gap: 15px;
+      margin-top: 15px;
+      margin-bottom: 20px;
+    }
+    .rich-opt-box {
+      display: flex;
+      flex-direction: column;
+      padding: 15px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+    }
+    .rich-opt-box:focus-within {
+      border-color: #cbd5e1;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    }
+    .quill-wrapper .quill {
+      display: flex;
+      flex-direction: column-reverse;
+    }
+    .quill-wrapper .ql-toolbar {
+      transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    }
+    .hide-toolbar .ql-toolbar {
+      max-height: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: none !important;
+      opacity: 0 !important;
+      overflow: hidden !important;
+      pointer-events: none !important;
+    }
+    .show-toolbar .ql-toolbar {
+      max-height: 300px !important;
+      opacity: 1 !important;
+      border: 1px solid #e2e8f0 !important;
+      background: #f8fafc !important;
+      border-radius: 8px;
+      padding: 8px !important;
+      margin-top: 12px !important;
+    }
+    .quill-wrapper .ql-container {
+      border: 1px solid #e2e8f0 !important;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+    .quill-wrapper .ql-editor {
+      padding: 12px 14px;
+      font-size: 15px;
+      min-height: 48px;
+      color: #0f172a;
+    }
+    .quill-wrapper .ql-editor.ql-blank::before {
+      left: 14px;
+      color: #94a3b8;
+      font-style: normal;
+    }
+    `}</style>
 
     <select
       value={correct}
@@ -1571,15 +1683,12 @@ student2@gmail.com`}
           onClick={() => {
             setEditingQIndex(null);
             setQ("");
-            setQImage("");
-            setA("");
-            setB("");
-            setC("");
-            setD("");
+            setOptions({ A: "", B: "", C: "", D: "" });
             setCorrect("");
             setCurrentQTime("");
             setQMarksCorrect("");
             setQMarksNegative("");
+            setActiveToolbar(null);
           }}
           style={{ marginLeft: "10px" }}
         >
@@ -1613,8 +1722,10 @@ student2@gmail.com`}
 
         {sections[viewSection].questions.map((item, i) => (
           <div key={i} className="question-item">
-            <span>
-                {i + 1}. {item.q}
+            <span style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+                <span style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                  <strong>{i + 1}.</strong> <span dangerouslySetInnerHTML={{ __html: item.q }} />
+                </span>
                 {item.questionImage && (
                   <span style={{display: "block", marginTop: "5px", color: "#2563eb", fontSize: "12px"}}>
                     🖼️ Figure attached
