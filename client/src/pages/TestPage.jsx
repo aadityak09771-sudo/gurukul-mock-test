@@ -709,7 +709,7 @@ if (!isAllowed) {
             originalSecIdx,
             questions: data.shuffleQuestions === false ? questionsWithIndex : questionsWithIndex.sort(() => Math.random() - 0.5)
           };
-        });
+        }).filter(sec => sec.questions.length > 0); // ✅ FIX: Automatically skip empty sections
 
         if (data.shuffleSections) {
           newShuffledSections = newShuffledSections.sort(() => Math.random() - 0.5);
@@ -726,7 +726,7 @@ if (!isAllowed) {
         }
         setTime((data.totalTime || 0) * 60);
         const firstQ = firstSection?.questions?.[0];
-        if (data.enableTimer && firstQ) {
+        if (data.timerMode === 'question' && firstQ) {
           setQTimeLeft(firstQ.time || 0);
           setLockNavigation(true);
         }
@@ -838,7 +838,7 @@ if (!isAllowed) {
             setSectionTimeLeft((sections[nextSection]?.time || 0) * 60);
             
             const firstQ = sections[nextSection]?.questions?.[0];
-            if (test?.enableTimer && firstQ) {
+            if (test?.timerMode === 'question' && firstQ) {
               setQTimeLeft(firstQ.time || 0);
               setLockNavigation(true);
             }
@@ -997,16 +997,17 @@ useEffect(() => {
   handleSubmitRef.current = handleSubmit;
 });
 
-const totalMarksCalc = useMemo(() => {
-  if (!test) return 0;
-  return test.sections?.reduce((acc, sec) => {
-    return acc + (sec.questions || []).reduce((qAcc, q) => {
-      if (q.type === 'written') return qAcc; 
-      const qMarksCorrect = q.marksCorrect !== undefined && q.marksCorrect !== null ? q.marksCorrect : (test.marksCorrect || 4);
-      return qAcc + qMarksCorrect;
-    }, 0);
-  }, 0) || 0;
-}, [test]);
+// ✅ FIX: Moved currentSection and useMemo ABOVE all early returns (Payment, Loading, Fullscreen) to prevent React Hook Crash
+const currentSection = sections[sectionIndex];
+
+const sectionMarksCalc = useMemo(() => {
+  if (!test || !currentSection) return 0;
+  return (currentSection.questions || []).reduce((qAcc, q) => {
+    if (q.type === 'written') return qAcc; 
+    const qMarksCorrect = q.marksCorrect !== undefined && q.marksCorrect !== null ? q.marksCorrect : (test.marksCorrect || 4);
+    return qAcc + qMarksCorrect;
+  }, 0);
+}, [test, currentSection]);
 
  // ONLY CHANGES ARE MARKED WITH ✅ FIX
 
@@ -1085,9 +1086,6 @@ if (isFullscreenSupported && !isFullscreen && !submitted) {
 const minutes = Math.floor(time / 60);
 const seconds = time % 60;
 
-// ✅ FIX: no change here
-const currentSection = sections[sectionIndex];
-
 const questions = currentSection?.questions || [];
 
 const currentQ = questions[current] || {};
@@ -1122,10 +1120,21 @@ return (
   <div className="exam-container">
 
     <style>{`
+      .q-box.answered {
+        background: #22c55e !important;
+        color: white !important;
+        border-color: #16a34a !important;
+      }
+      .q-box.marked {
+        background: #eab308 !important;
+        color: white !important;
+        border-color: #ca8a04 !important;
+      }
       .q-box.answered-marked {
         background: #9333ea !important;
         color: white !important;
         position: relative;
+        border-color: #7e22ce !important;
       }
       .q-box.answered-marked::after {
         content: '';
@@ -1187,11 +1196,11 @@ return (
       </div>
 
       <div className="legend">
-        <p>✅ Answered: {secAnsweredCount}</p>
-        <p>🟪 Marked: {secMarkedCount}</p>
-        <p>🟣 Answered & Marked: {secAnsweredMarkedCount}</p>
-        <p>⬜ Not Answered: {secNotAnsweredCount}</p>
-        <p style={{ marginTop: '10px', fontWeight: 'bold' }}>🎯 Total Marks: {totalMarksCalc}</p>
+        <p><span style={{display: 'inline-block', width: '12px', height: '12px', background: '#22c55e', marginRight: '8px', borderRadius: '2px'}}></span> Answered: {secAnsweredCount}</p>
+        <p><span style={{display: 'inline-block', width: '12px', height: '12px', background: '#eab308', marginRight: '8px', borderRadius: '2px'}}></span> Marked: {secMarkedCount}</p>
+        <p><span style={{display: 'inline-block', width: '12px', height: '12px', background: '#9333ea', marginRight: '8px', borderRadius: '2px'}}></span> Answered & Marked: {secAnsweredMarkedCount}</p>
+        <p><span style={{display: 'inline-block', width: '12px', height: '12px', background: '#f1f5f9', border: '1px solid #cbd5e1', marginRight: '8px', borderRadius: '2px'}}></span> Not Answered: {secNotAnsweredCount}</p>
+        <p style={{ marginTop: '10px', fontWeight: 'bold', color: '#1e293b', borderTop: '1px solid #e2e8f0', paddingTop: '10px' }}>🎯 Section Marks: {sectionMarksCalc}</p>
       </div>
     </div>
 
@@ -1283,7 +1292,7 @@ return (
   const firstQ =
     sections[index]?.questions?.[0];
 
-  if (test?.enableTimer && firstQ) {
+  if (test?.timerMode === 'question' && firstQ) {
 
     setQTimeLeft(firstQ.time || 0);
 
@@ -1438,7 +1447,7 @@ return (
           if (current > 0) {
             setCurrent(current - 1);
 
-            if (test?.enableTimer) {
+            if (test?.timerMode === 'question') {
               const prevQ = questions[current - 1];
               setQTimeLeft(prevQ?.time || 0);
               setLockNavigation(true);
@@ -1503,7 +1512,7 @@ return (
             
             setCurrent(next);
 
-            if (test?.enableTimer) {
+            if (test?.timerMode === 'question') {
               const nextQ = questions[next];
               setQTimeLeft(nextQ?.time || 0);
               setLockNavigation(true);
@@ -1512,13 +1521,23 @@ return (
             else {
 
               // LAST QUESTION OF SECTION
-
-              if (
-                test?.timerMode !== "section" &&
-                sectionIndex + 1 >= sections.length
-              ) {
+              if (sectionIndex + 1 < sections.length) {
+                if (test?.timerMode === "section" && sectionTimeLeft > 0) {
+                  setPopup("section-timer-locked");
+                } else {
+                  setSectionIndex(sectionIndex + 1);
+                  setCurrent(0);
+                  const firstQ = sections[sectionIndex + 1]?.questions?.[0];
+                  if (test?.timerMode === 'question' && firstQ) {
+                    setQTimeLeft(firstQ.time || 0);
+                    setLockNavigation(true);
+                  }
+                }
+              } else {
+                // LAST QUESTION OF ENTIRE TEST
                 let hasTimeRemaining = false;
                 if (test?.timerMode === "total" && time > 0) hasTimeRemaining = true;
+                else if (test?.timerMode === "section" && sectionTimeLeft > 0) hasTimeRemaining = true;
                 else if (test?.timerMode === "question" && qTimeLeft > 0) hasTimeRemaining = true;
 
                 if (hasTimeRemaining) {

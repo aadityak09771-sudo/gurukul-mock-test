@@ -76,3 +76,41 @@ export const loginAdmin = async (username, password) => {
     );
   }
 };
+
+// ================= SUPER ADMIN =================
+export const getAdminsAPI = async () => {
+  try {
+    const res = await API.get("/auth/admins");
+    return res.data;
+  } catch (err) {
+    throw new Error(err.response?.data?.msg || "Failed to fetch admins ❌");
+  }
+};
+
+export const updateAdminPasswordAPI = async (adminId, newPassword) => {
+  try {
+    const res = await API.put("/auth/admins/update-password", { adminId, newPassword });
+    return res.data;
+  } catch (err) {
+    throw new Error(err.response?.data?.msg || "Failed to update password ❌");
+  }
+};
+
+// ================= CHANGE MY PASSWORD =================
+export const changeMyPasswordAPI = async (oldPassword, newPassword) => {
+  try {
+    const res = await API.put("/auth/change-password", { oldPassword, newPassword });
+    return res.data;
+  } catch (err) {
+    throw new Error(err.response?.data?.msg || "Failed to change password ❌");
+  }
+};
+
+export const getAdminCredentialsAPI = async () => {
+  try {
+    const res = await API.get("/auth/admin-credentials");
+    return res.data;
+  } catch (err) {
+    throw new Error(err.response?.data?.msg || "Failed to load credentials ❌");
+  }
+};

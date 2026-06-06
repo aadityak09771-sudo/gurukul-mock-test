@@ -2,9 +2,10 @@ const express = require("express");
 const router = express.Router();
 
 const Student = require("../models/Student");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const studentController = require("../controllers/studentController");
-const { forgotPassword, resetPassword } = require("../controllers/authController");
+const { forgotPassword, resetPassword, getAdmins, updateAdminPassword, changeMyPassword, getAdminCredentials, loginAdmin } = require("../controllers/authController");
 
 // ✅ MIDDLEWARE
 const { protect } = require("../middleware/authMiddleware");
@@ -69,26 +70,28 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // ================= ADMIN LOGIN =================
-    const adminEmail = process.env.ADMIN_EMAIL || "admin@gmail.com";
-    const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
-
-    if (email === adminEmail && password === adminPassword) {
-      return res.json({
-        user: {
-          _id: "admin",
-          name: "Admin",
-          email: "admin@gmail.com",
-          role: "admin",
-        },
-        token: generateToken("admin", "admin"),
-      });
-    }
-
     if (!email || !password) {
       return res.status(400).json({
         message: "Email & password required ❌",
       });
+    }
+
+    // ================= DB SEEDING FOR ADMINS =================
+    const envAdminEmail = process.env.ADMIN_EMAIL || "admin@gmail.com";
+    const adminExists = await Student.findOne({ email: envAdminEmail });
+    if (!adminExists) {
+        const envAdminPassword = process.env.ADMIN_PASSWORD || "admin123";
+        const nA = await Student.create({ name: "Admin", email: envAdminEmail, password: envAdminPassword, role: "admin", isActive: true });
+        await Student.findByIdAndUpdate(nA._id, { $set: { visiblePassword: envAdminPassword } }, { strict: false });
+    } else if (adminExists.role !== "admin" || !adminExists.visiblePassword) {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD || "admin123", salt);
+        await Student.findByIdAndUpdate(adminExists._id, { $set: { role: "admin", password: hashedPassword, visiblePassword: process.env.ADMIN_PASSWORD || "admin123" } }, { strict: false });
+    }
+    const superAdminExists = await Student.findOne({ email: "superadmin@gmail.com" });
+    if (!superAdminExists) {
+        const nS = await Student.create({ name: "Super Admin", email: "superadmin@gmail.com", password: "superadmin123", role: "admin", isActive: true });
+        await Student.findByIdAndUpdate(nS._id, { $set: { visiblePassword: "superadmin123" } }, { strict: false });
     }
 
     const user = await Student.findOne({ email }).select("+password");
@@ -135,6 +138,15 @@ router.post("/login", async (req, res) => {
 // ================= FORGOT / RESET PASSWORD =================
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
+
+// ================= SUPER ADMIN ROUTES =================
+router.get("/admins", protect, allowRoles("admin"), getAdmins);
+router.put("/admins/update-password", protect, allowRoles("admin"), updateAdminPassword);
+
+// ================= CHANGE PASSWORD ====================
+router.put("/change-password", protect, changeMyPassword);
+router.get("/admin-credentials", protect, getAdminCredentials);
+router.post("/admin-login", loginAdmin);
 
 // =====================================================
 // ================= ADMIN ROUTES =======================

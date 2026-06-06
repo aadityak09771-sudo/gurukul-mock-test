@@ -1,6 +1,8 @@
 const Student = require("../models/Student");
+const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
+const bcrypt = require("bcryptjs");
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || "smtp.gmail.com",
@@ -14,8 +16,8 @@ const transporter = nodemailer.createTransport({
 });
 
 // ================= TOKEN =================
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
+const generateToken = (id, role) => {
+  return jwt.sign({ id, role }, process.env.JWT_SECRET || "secret123", {
     expiresIn: "7d",
   });
 };
@@ -38,7 +40,7 @@ exports.registerStudent = async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      token: generateToken(user._id),
+      token: generateToken(user._id, user.role),
     });
   } catch (err) {
     console.error("REGISTER ERROR:", err);
@@ -67,7 +69,7 @@ exports.loginStudent = async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      token: generateToken(user._id),
+      token: generateToken(user._id, user.role),
     });
   } catch (err) {
     console.error("LOGIN ERROR:", err);
@@ -121,11 +123,9 @@ exports.resetPassword = async (req, res) => {
       return res.status(400).json({ msg: "OTP Expired. Please request a new one ❌" });
     }
 
-    // Update password (model's pre-save hook will hash it automatically)
-    user.password = newPassword;
-    await user.save();
-
-    await Student.findByIdAndUpdate(user._id, { $unset: { resetOtp: 1, resetOtpExpire: 1 } }, { strict: false });
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    await Student.findByIdAndUpdate(user._id, { $set: { password: hashedPassword }, $unset: { resetOtp: 1, resetOtpExpire: 1 } }, { strict: false });
 
     res.json({ msg: "Password reset successfully! ✅ You can now login." });
   } catch (err) {
@@ -136,15 +136,129 @@ exports.resetPassword = async (req, res) => {
 
 // ================= ADMIN LOGIN =================
 exports.loginAdmin = async (req, res) => {
-  const { username, password } = req.body;
+  try {
+    const { username, password } = req.body;
+    
+    // Auto Migrate / Seed Database
+    const envAdminEmail = process.env.ADMIN_EMAIL || "admin@gmail.com";
+    const adminExists = await Student.findOne({ email: envAdminEmail });
+    if (!adminExists) {
+        const envAdminPassword = process.env.ADMIN_PASSWORD || "admin123";
+        const nA = await Student.create({ name: "Admin", email: envAdminEmail, password: envAdminPassword, role: "admin", isActive: true });
+        await Student.findByIdAndUpdate(nA._id, { $set: { visiblePassword: envAdminPassword } }, { strict: false });
+    } else if (adminExists.role !== "admin" || !adminExists.visiblePassword) {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD || "admin123", salt);
+        await Student.findByIdAndUpdate(adminExists._id, { $set: { role: "admin", password: hashedPassword, visiblePassword: process.env.ADMIN_PASSWORD || "admin123" } }, { strict: false });
+    }
+    const superAdminExists = await Student.findOne({ email: "superadmin@gmail.com" });
+    if (!superAdminExists) {
+        const nS = await Student.create({ name: "Super Admin", email: "superadmin@gmail.com", password: "superadmin123", role: "admin", isActive: true });
+        await Student.findByIdAndUpdate(nS._id, { $set: { visiblePassword: "superadmin123" } }, { strict: false });
+    }
 
-  if (username === "admin" && password === "admin123") {
-    return res.json({
-      name: "Admin",
-      role: "admin",
-      token: generateToken("admin"),
+    const user = await Student.findOne({ email: username, role: "admin" }).select("+password");
+    if (!user) return res.status(400).json({ msg: "Invalid admin credentials ❌" });
+    
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) return res.status(400).json({ msg: "Invalid admin credentials ❌" });
+
+    res.json({
+      name: user.name,
+      role: user.role,
+      email: user.email,
+      token: generateToken(user._id, user.role),
     });
+  } catch (err) {
+    console.error("ADMIN LOGIN ERROR:", err);
+    res.status(500).json({ msg: "Server Error ❌" });
   }
+};
 
-  res.status(400).json({ msg: "Invalid admin credentials ❌" });
+// ================= SUPER ADMIN CONTROLS =================
+exports.getAdmins = async (req, res) => {
+  try {
+    const userId = req.user?._id || req.user?.id;
+    
+    let reqUser = null;
+    try { if (userId) reqUser = await Student.findById(userId); } catch(e){}
+
+    if (!reqUser || reqUser.email !== "superadmin@gmail.com") return res.status(400).json({ msg: "SuperAdmin Access Denied" });
+    
+    const admins = await Student.find({ email: { $ne: "superadmin@gmail.com" }, role: "admin" }).select("-password").lean({ strict: false });
+    res.json(admins);
+  } catch (err) {
+    res.status(500).json({ msg: `Admins API Error: ${err.message}` });
+  }
+};
+
+exports.updateAdminPassword = async (req, res) => {
+  try {
+    const userId = req.user?._id || req.user?.id;
+    
+    let reqUser = null;
+    try { if (userId) reqUser = await Student.findById(userId); } catch(e){}
+
+    if (!reqUser || reqUser.email !== "superadmin@gmail.com") return res.status(400).json({ msg: "Access Denied" });
+    
+    const { adminId, newPassword } = req.body;
+    const admin = await Student.findById(adminId);
+    if (!admin || admin.email === "superadmin@gmail.com") return res.status(404).json({ msg: "Admin not found ❌" });
+    
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    await Student.findByIdAndUpdate(admin._id, { $set: { password: hashedPassword, visiblePassword: newPassword } }, { strict: false });
+    
+    res.json({ msg: "Password updated successfully ✅" });
+  } catch (err) {
+    res.status(500).json({ msg: "Server Error ❌: " + err.message });
+  }
+};
+
+// ================= CHANGE MY PASSWORD =================
+exports.changeMyPassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const userId = req.user?._id || req.user?.id;
+    
+    let user = null;
+    try { if (userId) user = await Student.findById(userId).select("+password"); } catch(e){}
+
+    if (!user) return res.status(404).json({ msg: "User not found ❌" });
+    
+    // ✅ STRICT MANUAL COMPARISON TO AVOID MODEL METHOD FAILURES
+    let isMatch = false;
+    try {
+      isMatch = await bcrypt.compare(oldPassword, user.password);
+    } catch (e) {}
+    
+    if (!isMatch && oldPassword === user.password) {
+      isMatch = true; // Fallback for safe plain text
+    }
+
+    if (!isMatch) return res.status(400).json({ msg: "Incorrect old password ❌" });
+    
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    await Student.findByIdAndUpdate(user._id, { $set: { password: hashedPassword, visiblePassword: newPassword } }, { strict: false });
+    
+    res.json({ msg: "Password changed successfully! ✅" });
+  } catch (err) {
+    res.status(500).json({ msg: "Server Error ❌: " + err.message });
+  }
+};
+
+// ================= GET CURRENT CREDENTIALS =================
+exports.getAdminCredentials = async (req, res) => {
+  try {
+    const userId = req.user?._id || req.user?.id;
+    
+    let user = null;
+    try { if (userId) user = await Student.findById(userId).lean(); } catch(e){}
+
+    if (!user) return res.status(404).json({ msg: "User not found in Database" });
+    res.json({ email: user.email, password: user.visiblePassword || "Hidden (Update to see)" });
+  } catch (err) {
+    res.status(500).json({ msg: `Creds API Error: ${err.message}` });
+  }
 };

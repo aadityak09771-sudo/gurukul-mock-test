@@ -11,6 +11,7 @@ import AdminPayment from "../components/admin/AdminPayment";
 import ResultDetails from "../components/admin/ResultDetails";
 import AdminMaterials from "../components/admin/AdminMaterials";
 import EditTest from "../components/admin/EditTest";
+import ChangePasswordSettings from "../components/admin/ChangePasswordSettings";
 import "./AdminPage.css";
 
 const AdminPage = () => {
@@ -108,6 +109,13 @@ const AdminPage = () => {
             📚 Study Materials
           </button>
 
+          <button
+            className={`sidebar-link ${isActive("settings") ? "active" : ""}`}
+            onClick={() => navigate("/admin/settings")}
+          >
+            ⚙️ Settings
+          </button>
+
         </div>
 
         {/* CONTENT */}
@@ -124,6 +132,7 @@ const AdminPage = () => {
             <Route path="result/:id" element={<ResultDetails />} />
             <Route path="materials" element={<AdminMaterials />} />
             <Route path="edit-test/:id" element={<EditTest />} />
+            <Route path="settings" element={<ChangePasswordSettings />} />
           </Routes>
 
         </div>
