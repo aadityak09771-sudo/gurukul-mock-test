@@ -95,22 +95,3 @@ export const updateAdminPasswordAPI = async (adminId, newPassword) => {
     throw new Error(err.response?.data?.msg || "Failed to update password ❌");
   }
 };
-
-// ================= CHANGE MY PASSWORD =================
-export const changeMyPasswordAPI = async (oldPassword, newPassword) => {
-  try {
-    const res = await API.put("/auth/change-password", { oldPassword, newPassword });
-    return res.data;
-  } catch (err) {
-    throw new Error(err.response?.data?.msg || "Failed to change password ❌");
-  }
-};
-
-export const getAdminCredentialsAPI = async () => {
-  try {
-    const res = await API.get("/auth/admin-credentials");
-    return res.data;
-  } catch (err) {
-    throw new Error(err.response?.data?.msg || "Failed to load credentials ❌");
-  }
-};

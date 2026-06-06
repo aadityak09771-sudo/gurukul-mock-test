@@ -8,7 +8,6 @@ const AuthPage = () => {
   const navigate = useNavigate();
   const { login, register } = useAuth();
 
-  const [role, setRole] = useState("student");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -164,8 +163,15 @@ const AuthPage = () => {
 
           {forgotMode ? (
             <>
-              <h2>Forgot Password?</h2>
-              <p className="welcome-subtext">Enter your email to receive an OTP</p>
+              {/* PREMIUM HEADER UI (FORGOT PASSWORD) */}
+              <div style={{ textAlign: "center", marginBottom: "30px", padding: "25px 20px", background: "linear-gradient(145deg, #fffbeb 0%, #fef3c7 100%)", borderRadius: "16px", border: "1px solid #fde68a", boxShadow: "inset 0 2px 4px rgba(255,255,255,0.5), 0 4px 15px rgba(245, 158, 11, 0.15)", transition: "all 0.3s ease", cursor: "default" }} onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "inset 0 2px 4px rgba(255,255,255,0.5), 0 8px 20px rgba(245, 158, 11, 0.25)"; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "inset 0 2px 4px rgba(255,255,255,0.5), 0 4px 15px rgba(245, 158, 11, 0.15)"; }}>
+                <h2 style={{ margin: "0 0 8px 0", color: "#b45309", fontSize: "26px", fontWeight: "800", letterSpacing: "-0.5px" }}>
+                  Forgot Password?
+                </h2>
+                <p style={{ margin: 0, color: "#9a3412", fontSize: "15px", fontWeight: "500" }}>
+                  Enter your email to receive an OTP
+                </p>
+              </div>
               
               <label>Registered Email</label>
               <input
@@ -185,8 +191,15 @@ const AuthPage = () => {
             </>
           ) : otpMode ? (
             <>
-              <h2>Reset Password</h2>
-              <p className="welcome-subtext">Enter the 6-digit OTP sent to {email}</p>
+              {/* PREMIUM HEADER UI (OTP MODE) */}
+              <div style={{ textAlign: "center", marginBottom: "30px", padding: "25px 20px", background: "linear-gradient(145deg, #fffbeb 0%, #fef3c7 100%)", borderRadius: "16px", border: "1px solid #fde68a", boxShadow: "inset 0 2px 4px rgba(255,255,255,0.5), 0 4px 15px rgba(245, 158, 11, 0.15)", transition: "all 0.3s ease", cursor: "default" }} onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "inset 0 2px 4px rgba(255,255,255,0.5), 0 8px 20px rgba(245, 158, 11, 0.25)"; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "inset 0 2px 4px rgba(255,255,255,0.5), 0 4px 15px rgba(245, 158, 11, 0.15)"; }}>
+                <h2 style={{ margin: "0 0 8px 0", color: "#b45309", fontSize: "26px", fontWeight: "800", letterSpacing: "-0.5px" }}>
+                  Reset Password
+                </h2>
+                <p style={{ margin: 0, color: "#9a3412", fontSize: "15px", fontWeight: "500", wordBreak: "break-word" }}>
+                  Enter the 6-digit OTP sent to {email}
+                </p>
+              </div>
               
               <label>OTP</label>
               <input
@@ -214,36 +227,19 @@ const AuthPage = () => {
             </>
           ) : (
             <>
-          {/* ROLE SWITCH */}
-          <div className="role-switch">
-            <button
-              className={role === "student" ? "active" : ""}
-              onClick={() => {
-                setRole("student");
-                setIsRegister(false);
-              }}
-            >
-              👨‍🎓 Student
-            </button>
 
-            <button
-              className={role === "admin" ? "active" : ""}
-              onClick={() => {
-                setRole("admin");
-                setIsRegister(false);
-              }}
-            >
-              👨‍💼 Admin
-            </button>
-          </div>
-
-          <h2>{isRegister ? "Create Account" : "Welcome Back!"}</h2>
-          <p className="welcome-subtext">
-            Login to continue your preparation journey
+        {/* PREMIUM HEADER UI */}
+        <div style={{ textAlign: "center", marginBottom: "30px", padding: "25px 20px", background: "linear-gradient(145deg, #fffbeb 0%, #fef3c7 100%)", borderRadius: "16px", border: "1px solid #fde68a", boxShadow: "inset 0 2px 4px rgba(255,255,255,0.5), 0 4px 15px rgba(245, 158, 11, 0.15)", transition: "all 0.3s ease", cursor: "default" }} onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "inset 0 2px 4px rgba(255,255,255,0.5), 0 8px 20px rgba(245, 158, 11, 0.25)"; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "inset 0 2px 4px rgba(255,255,255,0.5), 0 4px 15px rgba(245, 158, 11, 0.15)"; }}>
+          <h2 style={{ margin: "0 0 8px 0", color: "#b45309", fontSize: "26px", fontWeight: "800", letterSpacing: "-0.5px" }}>
+            {isRegister ? "Create Account" : "Welcome Back!"}
+          </h2>
+          <p style={{ margin: 0, color: "#9a3412", fontSize: "15px", fontWeight: "500" }}>
+            {isRegister ? "Join us and accelerate your career" : "Login to continue your preparation journey"}
           </p>
+        </div>
 
           {/* NAME FIELD */}
-          {isRegister && role === "student" && (
+        {isRegister && (
             <>
               <label>Full Name</label>
               <input
@@ -280,7 +276,7 @@ const AuthPage = () => {
             </button>
           </div>
 
-          {!isRegister && role === "student" && (
+        {!isRegister && (
             <div style={{ textAlign: "right", marginTop: "5px", marginBottom: "15px" }}>
               <span style={{ fontSize: "13px", color: "#2563eb", cursor: "pointer", fontWeight: "bold" }} onClick={() => { setForgotMode(true); setOtpMode(false); }}>Forgot Password?</span>
             </div>
@@ -302,17 +298,23 @@ const AuthPage = () => {
           </button>
 
           {/* REGISTER LINK */}
-          {role === "student" && (
+        {!isRegister && (
             <p className="register-text">
-              {isRegister
-                ? "Already have an account?"
-                : "Don't have an account?"}
+            Don't have an account?
 
               <span onClick={() => setIsRegister(!isRegister)}>
-                {isRegister ? " Login here" : " Register here"}
+              Register here
               </span>
             </p>
           )}
+        {isRegister && (
+          <p className="register-text">
+            Already have an account?
+            <span onClick={() => setIsRegister(!isRegister)}>
+              Login here
+            </span>
+          </p>
+        )}
 
             </>
           )}

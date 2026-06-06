@@ -56,6 +56,17 @@ body {
  box-shadow:
   0 25px 60px rgba(0,0,0,0.35),
   0 0 0 1px rgba(255,255,255,0.08);
+
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* MAIN CARD HOVER WITH YELLOW GLOW */
+.auth-card:hover {
+  transform: translateY(-5px);
+  box-shadow:
+    0 35px 65px rgba(0,0,0,0.4),
+    0 0 40px rgba(255, 152, 0, 0.3),
+    0 0 0 1px rgba(255,255,255,0.15);
 }
 
 /* ================= LEFT SIDE ================= */

@@ -5,7 +5,7 @@ const Student = require("../models/Student");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const studentController = require("../controllers/studentController");
-const { forgotPassword, resetPassword, getAdmins, updateAdminPassword, changeMyPassword, getAdminCredentials, loginAdmin } = require("../controllers/authController");
+const { forgotPassword, resetPassword, getAdmins, updateAdminPassword, loginAdmin } = require("../controllers/authController");
 
 // ✅ MIDDLEWARE
 const { protect } = require("../middleware/authMiddleware");
@@ -143,9 +143,6 @@ router.post("/reset-password", resetPassword);
 router.get("/admins", protect, allowRoles("admin"), getAdmins);
 router.put("/admins/update-password", protect, allowRoles("admin"), updateAdminPassword);
 
-// ================= CHANGE PASSWORD ====================
-router.put("/change-password", protect, changeMyPassword);
-router.get("/admin-credentials", protect, getAdminCredentials);
 router.post("/admin-login", loginAdmin);
 
 // =====================================================

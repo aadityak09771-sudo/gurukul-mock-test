@@ -178,10 +178,13 @@ exports.loginAdmin = async (req, res) => {
 // ================= SUPER ADMIN CONTROLS =================
 exports.getAdmins = async (req, res) => {
   try {
-    const userId = req.user?._id || req.user?.id;
+    const userId = req.user?._id || req.user?.id || (typeof req.user === "string" ? req.user : null);
     
     let reqUser = null;
-    try { if (userId) reqUser = await Student.findById(userId); } catch(e){}
+    try { 
+      if (userId) reqUser = await Student.findById(userId); 
+      if (!reqUser && req.user?.email) reqUser = await Student.findOne({ email: req.user.email });
+    } catch(e){}
 
     if (!reqUser || reqUser.email !== "superadmin@gmail.com") return res.status(400).json({ msg: "SuperAdmin Access Denied" });
     
@@ -194,10 +197,13 @@ exports.getAdmins = async (req, res) => {
 
 exports.updateAdminPassword = async (req, res) => {
   try {
-    const userId = req.user?._id || req.user?.id;
+    const userId = req.user?._id || req.user?.id || (typeof req.user === "string" ? req.user : null);
     
     let reqUser = null;
-    try { if (userId) reqUser = await Student.findById(userId); } catch(e){}
+    try { 
+      if (userId) reqUser = await Student.findById(userId); 
+      if (!reqUser && req.user?.email) reqUser = await Student.findOne({ email: req.user.email });
+    } catch(e){}
 
     if (!reqUser || reqUser.email !== "superadmin@gmail.com") return res.status(400).json({ msg: "Access Denied" });
     
@@ -212,53 +218,5 @@ exports.updateAdminPassword = async (req, res) => {
     res.json({ msg: "Password updated successfully ✅" });
   } catch (err) {
     res.status(500).json({ msg: "Server Error ❌: " + err.message });
-  }
-};
-
-// ================= CHANGE MY PASSWORD =================
-exports.changeMyPassword = async (req, res) => {
-  try {
-    const { oldPassword, newPassword } = req.body;
-    const userId = req.user?._id || req.user?.id;
-    
-    let user = null;
-    try { if (userId) user = await Student.findById(userId).select("+password"); } catch(e){}
-
-    if (!user) return res.status(404).json({ msg: "User not found ❌" });
-    
-    // ✅ STRICT MANUAL COMPARISON TO AVOID MODEL METHOD FAILURES
-    let isMatch = false;
-    try {
-      isMatch = await bcrypt.compare(oldPassword, user.password);
-    } catch (e) {}
-    
-    if (!isMatch && oldPassword === user.password) {
-      isMatch = true; // Fallback for safe plain text
-    }
-
-    if (!isMatch) return res.status(400).json({ msg: "Incorrect old password ❌" });
-    
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
-    await Student.findByIdAndUpdate(user._id, { $set: { password: hashedPassword, visiblePassword: newPassword } }, { strict: false });
-    
-    res.json({ msg: "Password changed successfully! ✅" });
-  } catch (err) {
-    res.status(500).json({ msg: "Server Error ❌: " + err.message });
-  }
-};
-
-// ================= GET CURRENT CREDENTIALS =================
-exports.getAdminCredentials = async (req, res) => {
-  try {
-    const userId = req.user?._id || req.user?.id;
-    
-    let user = null;
-    try { if (userId) user = await Student.findById(userId).lean(); } catch(e){}
-
-    if (!user) return res.status(404).json({ msg: "User not found in Database" });
-    res.json({ email: user.email, password: user.visiblePassword || "Hidden (Update to see)" });
-  } catch (err) {
-    res.status(500).json({ msg: `Creds API Error: ${err.message}` });
   }
 };
