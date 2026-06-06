@@ -211,17 +211,24 @@ const [shuffleSections, setShuffleSections] = useState(false);
 const [editingQIndex, setEditingQIndex] = useState(null);
 
   const [q, setQ] = useState("");
+  const [qHindi, setQHindi] = useState("");
   const [qImage, setQImage] = useState("");
   const [options, setOptions] = useState({ A: "", B: "", C: "", D: "" });
+  const [optionsHindi, setOptionsHindi] = useState({ A: "", B: "", C: "", D: "" });
   const [correct, setCorrect] = useState("");
   const [qMarksCorrect, setQMarksCorrect] = useState("");
   const [qMarksNegative, setQMarksNegative] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [activeToolbar, setActiveToolbar] = useState(null);
+  const [inputLang, setInputLang] = useState("english");
 
   const handleOptionChange = (value, optionKey) => {
     setOptions(prev => ({ ...prev, [optionKey]: value }));
+  };
+
+  const handleOptionHindiChange = (value, optionKey) => {
+    setOptionsHindi(prev => ({ ...prev, [optionKey]: value }));
   };
 
   //section timer
@@ -329,6 +336,7 @@ const removeCustomField = (
 
   const newQ = {
     q,
+    qHindi,
     questionImage: qImage,
    type: currentIsWritten ? "written" : "mcq",
 
@@ -336,6 +344,10 @@ options:
   currentIsWritten
     ? {}
     : options,
+optionsHindi:
+  currentIsWritten
+    ? {}
+    : optionsHindi,
    correct:
   currentIsWritten
     ? ""
@@ -360,8 +372,10 @@ options:
   setSections(updatedSections);
 
   setQ("");
+  setQHindi("");
   setQImage("");
   setOptions({ A: "", B: "", C: "", D: "" });
+  setOptionsHindi({ A: "", B: "", C: "", D: "" });
   setCorrect("");
   setCurrentQTime("");
   setQMarksCorrect("");
@@ -376,12 +390,19 @@ options:
     setEditingQIndex({ secIndex, qIndex });
     
     setQ(questionToEdit.q);
+    setQHindi(questionToEdit.qHindi || "");
     setQImage(questionToEdit.questionImage || "");
     setOptions({
       A: questionToEdit.options?.A || "",
       B: questionToEdit.options?.B || "",
       C: questionToEdit.options?.C || "",
       D: questionToEdit.options?.D || ""
+    });
+    setOptionsHindi({
+      A: questionToEdit.optionsHindi?.A || "",
+      B: questionToEdit.optionsHindi?.B || "",
+      C: questionToEdit.optionsHindi?.C || "",
+      D: questionToEdit.optionsHindi?.D || ""
     });
     setCorrect(questionToEdit.correct || "");
     setCurrentQTime(questionToEdit.time || "");
@@ -409,8 +430,10 @@ options:
   if (editingQIndex && editingQIndex.secIndex === secIndex && editingQIndex.qIndex === qIndex) {
       setEditingQIndex(null);
       setQ("");
+      setQHindi("");
       setQImage("");
       setOptions({ A: "", B: "", C: "", D: "" });
+      setOptionsHindi({ A: "", B: "", C: "", D: "" });
       setCorrect("");
       setCurrentQTime("");
       setQMarksCorrect("");
@@ -512,6 +535,7 @@ if (
 
   questions: sec.questions.map(q => ({
     q: q.q,
+    qHindi: q.qHindi || "",
     questionImage: q.questionImage || "",
     type: q.type,
     options: {
@@ -519,6 +543,12 @@ if (
       B: q.options?.B || "",
       C: q.options?.C || "",
       D: q.options?.D || "",
+    },
+    optionsHindi: {
+      A: q.optionsHindi?.A || "",
+      B: q.optionsHindi?.B || "",
+      C: q.optionsHindi?.C || "",
+      D: q.optionsHindi?.D || "",
     },
 
     correct: q.correct,
@@ -1441,15 +1471,34 @@ student2@gmail.com`}
           </div>
         )}
         
+        <div style={{ marginBottom: "15px" }}>
+          <label style={{ marginRight: "10px", fontWeight: "bold" }}>Language for Input:</label>
+          <select value={inputLang} onChange={e => setInputLang(e.target.value)} style={{ padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1" }}>
+            <option value="english">English</option>
+            <option value="hindi">Hindi (Optional)</option>
+          </select>
+        </div>
+
         <div style={{ marginBottom: "15px", backgroundColor: "white", borderRadius: "8px" }}>
-          <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold", color: "#334155" }}>Question (Supports pasting from MS Word, Images, Math Symbols):</label>
-          <ReactQuill 
-            theme="snow" 
-            value={q} 
-            onChange={setQ} 
-            placeholder="Type or paste your question here..."
-            modules={MAIN_MODULES}
-          />
+          <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold", color: "#334155" }}>Question ({inputLang.toUpperCase()}):</label>
+          <div style={{ display: inputLang === 'english' ? 'block' : 'none' }}>
+            <ReactQuill 
+              theme="snow" 
+              value={q} 
+              onChange={setQ} 
+              placeholder={`Type or paste your question here in english...`}
+              modules={MAIN_MODULES}
+            />
+          </div>
+          <div style={{ display: inputLang === 'hindi' ? 'block' : 'none' }}>
+            <ReactQuill 
+              theme="snow" 
+              value={qHindi} 
+              onChange={setQHindi} 
+              placeholder={`Type or paste your question here in hindi...`}
+              modules={MAIN_MODULES}
+            />
+          </div>
         </div>
         <div style={{ display: "flex", gap: "10px", marginTop: "10px", marginBottom: "10px" }}>
           <input 
@@ -1532,13 +1581,24 @@ student2@gmail.com`}
             </span>
             
             <div style={{ flex: 1, minWidth: 0 }} className="quill-wrapper">
-              <ReactQuill
-                theme="snow"
-                value={options[opt]}
-                onChange={(value) => handleOptionChange(value, opt)}
-                placeholder={`Option ${opt} text...`}
-                modules={OPTION_MODULES}
-              />
+              <div style={{ display: inputLang === 'english' ? 'block' : 'none' }}>
+                <ReactQuill
+                  theme="snow"
+                  value={options[opt]}
+                  onChange={(value) => handleOptionChange(value, opt)}
+                  placeholder={`Option ${opt} text in english...`}
+                  modules={OPTION_MODULES}
+                />
+              </div>
+              <div style={{ display: inputLang === 'hindi' ? 'block' : 'none' }}>
+                <ReactQuill
+                  theme="snow"
+                  value={optionsHindi[opt]}
+                  onChange={(value) => handleOptionHindiChange(value, opt)}
+                  placeholder={`Option ${opt} text in hindi...`}
+                  modules={OPTION_MODULES}
+                />
+              </div>
             </div>
 
             <button
@@ -1683,7 +1743,9 @@ student2@gmail.com`}
           onClick={() => {
             setEditingQIndex(null);
             setQ("");
+            setQHindi("");
             setOptions({ A: "", B: "", C: "", D: "" });
+            setOptionsHindi({ A: "", B: "", C: "", D: "" });
             setCorrect("");
             setCurrentQTime("");
             setQMarksCorrect("");
@@ -1726,6 +1788,11 @@ student2@gmail.com`}
                 <span style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
                   <strong>{i + 1}.</strong> <span dangerouslySetInnerHTML={{ __html: item.q }} />
                 </span>
+                {item.qHindi && item.qHindi !== '<p><br></p>' && (
+                  <span style={{ display: "block", marginTop: "4px", paddingLeft: "10px", borderLeft: "3px solid #f59e0b", color: "#64748b" }}>
+                    <span dangerouslySetInnerHTML={{ __html: item.qHindi }} />
+                  </span>
+                )}
                 {item.questionImage && (
                   <span style={{display: "block", marginTop: "5px", color: "#2563eb", fontSize: "12px"}}>
                     🖼️ Figure attached

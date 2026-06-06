@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { forgotPasswordAPI, resetPasswordAPI } from "../services/authService";
 import "./AuthPage.css";
 
 const AuthPage = () => {
@@ -15,6 +16,11 @@ const AuthPage = () => {
 
   const [isRegister, setIsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const [forgotMode, setForgotMode] = useState(false);
+  const [otpMode, setOtpMode] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
   // ================= LOGIN =================
   const handleLogin = async () => {
@@ -53,6 +59,37 @@ const AuthPage = () => {
       await register(name, email, password, "student");
 
       navigate("/student");
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ================= FORGOT PASSWORD =================
+  const handleSendOtp = async () => {
+    if (!email) return alert("Please enter your registered email ❌");
+    try {
+      setLoading(true);
+      const res = await forgotPasswordAPI(email);
+      alert(res.msg);
+      setForgotMode(false);
+      setOtpMode(true);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!otp || !newPassword) return alert("Please fill both OTP and New Password ❌");
+    try {
+      setLoading(true);
+      const res = await resetPasswordAPI(email, otp, newPassword);
+      alert(res.msg);
+      setOtpMode(false);
+      setPassword("");
     } catch (err) {
       alert(err.message);
     } finally {
@@ -125,6 +162,58 @@ const AuthPage = () => {
         {/* RIGHT SIDE */}
         <div className="auth-right">
 
+          {forgotMode ? (
+            <>
+              <h2>Forgot Password?</h2>
+              <p className="welcome-subtext">Enter your email to receive an OTP</p>
+              
+              <label>Registered Email</label>
+              <input
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+
+              <button className="login-btn" onClick={handleSendOtp} disabled={loading} style={{ marginTop: "20px" }}>
+                {loading ? "Sending..." : "Send OTP ✉️"}
+              </button>
+
+              <p className="register-text">
+                Remembered your password?{" "}
+                <span onClick={() => setForgotMode(false)}>Login here</span>
+              </p>
+            </>
+          ) : otpMode ? (
+            <>
+              <h2>Reset Password</h2>
+              <p className="welcome-subtext">Enter the 6-digit OTP sent to {email}</p>
+              
+              <label>OTP</label>
+              <input
+                placeholder="123456"
+                maxLength="6"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+              />
+
+              <label>New Password</label>
+              <input
+                type="password"
+                placeholder="Enter new password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+
+              <button className="login-btn" onClick={handleResetPassword} disabled={loading} style={{ marginTop: "20px" }}>
+                {loading ? "Resetting..." : "Reset Password ✅"}
+              </button>
+
+              <p className="register-text">
+                <span onClick={() => { setOtpMode(false); setForgotMode(false); }}>Cancel & Login</span>
+              </p>
+            </>
+          ) : (
+            <>
           {/* ROLE SWITCH */}
           <div className="role-switch">
             <button
@@ -191,6 +280,12 @@ const AuthPage = () => {
             </button>
           </div>
 
+          {!isRegister && role === "student" && (
+            <div style={{ textAlign: "right", marginTop: "5px", marginBottom: "15px" }}>
+              <span style={{ fontSize: "13px", color: "#2563eb", cursor: "pointer", fontWeight: "bold" }} onClick={() => { setForgotMode(true); setOtpMode(false); }}>Forgot Password?</span>
+            </div>
+          )}
+
           {/* BUTTON */}
           <button
             className="login-btn"
@@ -217,6 +312,9 @@ const AuthPage = () => {
                 {isRegister ? " Login here" : " Register here"}
               </span>
             </p>
+          )}
+
+            </>
           )}
 
         </div>

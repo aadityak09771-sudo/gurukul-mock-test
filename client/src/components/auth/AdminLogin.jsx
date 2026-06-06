@@ -8,7 +8,7 @@ export default function AdminLogin() {
 
   const handleLogin = async () => {
     try {
-      const res = await loginAdmin(form);
+      const res = await loginAdmin(form.username, form.password);
       localStorage.setItem("auth", JSON.stringify(res.data));
       navigate("/admin");
     } catch {

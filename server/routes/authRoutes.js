@@ -4,6 +4,7 @@ const router = express.Router();
 const Student = require("../models/Student");
 const jwt = require("jsonwebtoken");
 const studentController = require("../controllers/studentController");
+const { forgotPassword, resetPassword } = require("../controllers/authController");
 
 // ✅ MIDDLEWARE
 const { protect } = require("../middleware/authMiddleware");
@@ -130,6 +131,10 @@ router.post("/login", async (req, res) => {
   }
 });
 
+
+// ================= FORGOT / RESET PASSWORD =================
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
 
 // =====================================================
 // ================= ADMIN ROUTES =======================

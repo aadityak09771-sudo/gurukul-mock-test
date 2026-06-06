@@ -103,6 +103,18 @@ const htmlToPlainText = (html) => {
   return text;
 };
 
+// Helper: Language Fallback logic
+const getLangText = (textEng, textHin, language) => {
+  const isHinEmpty = !textHin || textHin === '<p><br></p>' || textHin.trim() === '';
+  return language === 'hindi' && !isHinEmpty ? textHin : (textEng || "");
+};
+
+const getLangOptions = (optEng, optHin, language) => {
+  const isHinEmpty = !optHin || !optHin.A || optHin.A === '<p><br></p>' || optHin.A.trim() === '';
+  return language === 'hindi' && !isHinEmpty ? optHin : (optEng || null);
+};
+
+
 // ================= SUBMIT RESULT =================
 exports.submitResult = async (req, res) => {
   try {
@@ -969,22 +981,26 @@ exports.exportStudentPDF = async (req, res) => {
       for (let index = 0; index < result.writtenAnswers.length; index++) {
         const q = result.writtenAnswers[index];
 
-          doc.fontSize(14);
-
-          doc.text(
-            `Q${index + 1}: ${htmlToPlainText(q.question)}`
-          );
+          const language = result.studentFields?.language || "english";
+          let qText = q.question; // fallback
 
           let qImage = null;
           if (test && test.sections) {
             for (const sec of test.sections) {
               const found = (sec.questions || []).find(sq => sq.type === 'written' && sq.q === q.question);
-              if (found && found.questionImage) {
-                qImage = found.questionImage;
+              if (found) {
+                qText = getLangText(found.q, found.qHindi, language);
+                if (found.questionImage) qImage = found.questionImage;
                 break;
               }
             }
           }
+
+          doc.fontSize(14);
+
+          doc.text(
+            `Q${index + 1}: ${htmlToPlainText(qText)}`
+          );
 
           if (qImage) {
             try {
@@ -1041,7 +1057,11 @@ exports.exportStudentPDF = async (req, res) => {
             const qMarksCorrect = q.marksCorrect !== undefined && q.marksCorrect !== null ? q.marksCorrect : (test.marksCorrect || 4);
             const qMarksNegative = q.marksNegative !== undefined && q.marksNegative !== null ? q.marksNegative : (test.marksNegative || 1);
 
-            doc.fontSize(12).fillColor('black').text(`Q: ${htmlToPlainText(q.q)} [+${qMarksCorrect}, -${qMarksNegative}]`);
+            const language = result.studentFields?.language || "english";
+            const qText = getLangText(q.q, q.qHindi, language);
+            const qOptions = getLangOptions(q.options, q.optionsHindi, language);
+
+            doc.fontSize(12).fillColor('black').text(`Q: ${htmlToPlainText(qText)} [+${qMarksCorrect}, -${qMarksNegative}]`);
 
             if (q.questionImage) {
               try {
@@ -1063,9 +1083,9 @@ exports.exportStudentPDF = async (req, res) => {
               }
             }
 
-            if (q.options) {
+            if (qOptions) {
               doc.moveDown(0.3);
-              Object.entries(q.options).forEach(([k, v]) => {
+              Object.entries(qOptions).forEach(([k, v]) => {
                 const plainTextV = htmlToPlainText(v);
                 if (k === q.correct) {
                   doc.fillColor('green').text(`  ${k}. ${plainTextV} [Correct Answer]`);
@@ -1296,15 +1316,19 @@ exports.exportStudentExcel = async (
           const qMarksCorrect = q.marksCorrect !== undefined && q.marksCorrect !== null ? q.marksCorrect : (test?.marksCorrect || 4);
           const qMarksNegative = q.marksNegative !== undefined && q.marksNegative !== null ? q.marksNegative : (test?.marksNegative || 1);
 
+          const language = result.studentFields?.language || "english";
+          const qText = getLangText(q.q, q.qHindi, language);
+          const qOptions = getLangOptions(q.options, q.optionsHindi, language);
+
           if (q.type === 'written') {
             const writtenAnsObj = result.writtenAnswers?.find(wa => wa.question === q.q);
             const writtenAns = writtenAnsObj ? writtenAnsObj.answer : (chosen || 'Not Answered');
-            rowData = [sec.name, `${htmlToPlainText(q.q)} [+${qMarksCorrect}, -${qMarksNegative}]`, writtenAns, '(Written)', '(Manual Check)', ''];
+            rowData = [sec.name, `${htmlToPlainText(qText)} [+${qMarksCorrect}, -${qMarksNegative}]`, writtenAns, '(Written)', '(Manual Check)', ''];
           } else {
             const isCorrect = chosen === q.correct;
-            const correctText = q.correct && q.options ? `${q.correct}: ${htmlToPlainText(q.options[q.correct])}` : 'N/A';
-            const chosenText = chosen && q.options ? `${chosen}: ${htmlToPlainText(q.options[chosen])}` : 'Not Attempted';
-            rowData = [sec.name, `${htmlToPlainText(q.q)} [+${qMarksCorrect}, -${qMarksNegative}]`, chosenText, correctText, chosen ? (isCorrect ? 'Correct' : 'Wrong') : 'Unattempted', ''];
+            const correctText = q.correct && qOptions ? `${q.correct}: ${htmlToPlainText(qOptions[q.correct])}` : 'N/A';
+            const chosenText = chosen && qOptions ? `${chosen}: ${htmlToPlainText(qOptions[chosen])}` : 'Not Attempted';
+            rowData = [sec.name, `${htmlToPlainText(qText)} [+${qMarksCorrect}, -${qMarksNegative}]`, chosenText, correctText, chosen ? (isCorrect ? 'Correct' : 'Wrong') : 'Unattempted', ''];
           }
           const dataRow = sheet.addRow(rowData);
           dataRow.eachCell((cell) => {
@@ -1490,11 +1514,15 @@ const generateEmailHTML = (result, test) => {
         const qMarksCorrect = q.marksCorrect !== undefined && q.marksCorrect !== null ? q.marksCorrect : (test?.marksCorrect || 4);
         const qMarksNegative = q.marksNegative !== undefined && q.marksNegative !== null ? q.marksNegative : (test?.marksNegative || 1);
         
+        const language = result.studentFields?.language || "english";
+        const qText = getLangText(q.q, q.qHindi, language);
+        const qOptions = getLangOptions(q.options, q.optionsHindi, language);
+
         if (q.type === 'written') {
            const writtenAns = result.writtenAnswers?.find(wa => wa.question === q.q)?.answer || chosen || 'Not Answered';
            html += `
             <div style="margin-bottom: 15px; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc;">
-              <div style="margin: 0 0 10px 0; font-size: 15px;"><strong>Q (Written):</strong> <div>${q.q}</div> <span style="font-size: 12px; color: #64748b;">[+${qMarksCorrect}, -${qMarksNegative}]</span></div>
+              <div style="margin: 0 0 10px 0; font-size: 15px;"><strong>Q (Written):</strong> <div>${qText}</div> <span style="font-size: 12px; color: #64748b;">[+${qMarksCorrect}, -${qMarksNegative}]</span></div>
               ${q.questionImage ? `<img src="${q.questionImage}" alt="Question Image" style="max-width: 100%; max-height: 300px; border-radius: 8px; margin-bottom: 10px;" />` : ''}
               <p style="margin: 5px 0; color: #475569;"><strong>Your Answer:</strong> ${writtenAns}</p>
             </div>
@@ -1503,13 +1531,13 @@ const generateEmailHTML = (result, test) => {
           const isCorrect = chosen === q.correct;
           html += `
             <div style="margin-bottom: 15px; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc;">
-              <div style="margin: 0 0 10px 0; font-size: 15px;"><strong>Q:</strong> <div>${q.q}</div> <span style="font-size: 12px; color: #64748b;">[+${qMarksCorrect}, -${qMarksNegative}]</span></div>
+              <div style="margin: 0 0 10px 0; font-size: 15px;"><strong>Q:</strong> <div>${qText}</div> <span style="font-size: 12px; color: #64748b;">[+${qMarksCorrect}, -${qMarksNegative}]</span></div>
               ${q.questionImage ? `<img src="${q.questionImage}" alt="Question Image" style="max-width: 100%; max-height: 300px; border-radius: 8px; margin-bottom: 10px;" />` : ''}
             </div>
           `;
           
-          if (q.options) {
-            Object.entries(q.options).forEach(([k, v]) => {
+          if (qOptions) {
+            Object.entries(qOptions).forEach(([k, v]) => {
               let bgColor = "transparent";
               let color = "#334155";
               let fw = "normal";

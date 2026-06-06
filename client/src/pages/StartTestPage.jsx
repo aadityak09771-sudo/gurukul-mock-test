@@ -49,7 +49,8 @@ useEffect(() => {
     Name: currentUser?.name || "",
     Email: currentUser?.email || "",
     roll: "",
-    phone: ""
+    phone: "",
+    language: "english"
   });
 
   const handleChange = (e) => {
@@ -119,6 +120,11 @@ useEffect(() => {
   }
 };
 
+  // ✅ AUTO-DETECT BILINGUAL TEST
+  const hasHindi = test?.sections?.some(sec => 
+    sec.questions?.some(q => q.qHindi && q.qHindi !== '<p><br></p>' && q.qHindi.trim() !== '')
+  );
+
   return (
     <div className="start-page">
 
@@ -175,6 +181,14 @@ useEffect(() => {
                 </select>
               </div>
             )}
+
+            {hasHindi && <div style={{ marginBottom: "15px", textAlign: "left" }}>
+              <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", color: "#334155" }}>Default Exam Language *</label>
+              <select name="language" value={form.language || "english"} onChange={handleChange} style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "15px", background: "white" }} required>
+                <option value="english">English</option>
+                <option value="hindi">Hindi</option>
+              </select>
+            </div>}
 
             {
   test?.customFields?.map(

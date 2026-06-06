@@ -3,6 +3,17 @@ import { useParams } from "react-router-dom";
 import API from "../../services/api";
 import "./ResultDetails.css";
 
+// ✅ GOVT EXAM HELPER: Safely fallback to English if Hindi translation is blank
+const getLangText = (textEng, textHin, language) => {
+  const isHinEmpty = !textHin || textHin === '<p><br></p>' || textHin.trim() === '';
+  return language === 'hindi' && !isHinEmpty ? textHin : (textEng || "");
+};
+
+const getLangOptions = (optEng, optHin, language) => {
+  const isHinEmpty = !optHin || !optHin.A || optHin.A === '<p><br></p>' || optHin.A.trim() === '';
+  return language === 'hindi' && !isHinEmpty ? optHin : (optEng || null);
+};
+
 const ResultDetails = () => {
 
   const { id } = useParams();
@@ -481,11 +492,15 @@ const ResultDetails = () => {
                   const qMarksCorrect = q.marksCorrect !== undefined && q.marksCorrect !== null ? q.marksCorrect : (result.testId?.marksCorrect || 4);
                   const qMarksNegative = q.marksNegative !== undefined && q.marksNegative !== null ? q.marksNegative : (result.testId?.marksNegative || 1);
                   
+                  const language = result.studentFields?.language || "english";
+                  const qText = getLangText(q.q, q.qHindi, language);
+                  const qOptions = getLangOptions(q.options, q.optionsHindi, language);
+
                   if (q.type === "written") {
                     return (
                       <div key={qIndex} style={{ marginBottom: "15px", padding: "15px", border: "1px solid #e2e8f0", borderRadius: "8px", background: "#f8fafc" }}>
                         <div style={{ fontWeight: "bold", margin: "0 0 10px 0", fontSize: "15px", display: "flex", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
-                          Q (Written): <div dangerouslySetInnerHTML={{ __html: q.q }} className="rich-text-content" /> <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "normal" }}>[+{qMarksCorrect}, -{qMarksNegative} Marks]</span>
+                          Q (Written): <div dangerouslySetInnerHTML={{ __html: qText }} className="rich-text-content" /> <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "normal" }}>[+{qMarksCorrect}, -{qMarksNegative} Marks]</span>
                         </div>
                         {q.questionImage && (
                           <div style={{ margin: "10px 0" }}>
@@ -503,7 +518,7 @@ const ResultDetails = () => {
                   return (
                     <div key={qIndex} style={{ marginBottom: "15px", padding: "15px", border: "1px solid #e2e8f0", borderRadius: "8px", background: "#f8fafc" }}>
                       <div style={{ fontWeight: "bold", margin: "0 0 10px 0", fontSize: "15px", display: "flex", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
-                        Q: <div dangerouslySetInnerHTML={{ __html: q.q }} className="rich-text-content" /> <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "normal" }}>[+{qMarksCorrect}, -{qMarksNegative} Marks]</span>
+                          Q: <div dangerouslySetInnerHTML={{ __html: qText }} className="rich-text-content" /> <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "normal" }}>[+{qMarksCorrect}, -{qMarksNegative} Marks]</span>
                       </div>
                       {q.questionImage && (
                         <div style={{ margin: "10px 0" }}>
@@ -511,7 +526,7 @@ const ResultDetails = () => {
                         </div>
                       )}
                       
-                      {q.options && Object.entries(q.options).map(([optKey, optVal]) => {
+                      {qOptions && Object.entries(qOptions).map(([optKey, optVal]) => {
                         let bgColor = "transparent";
                         let color = "#334155";
                         let fw = "normal";

@@ -63,6 +63,12 @@ const windowBlurCountRef = useRef(0);
 const totalFaceViolationsRef = useRef(0);
 const submitReasonRef = useRef("Submitted manually by student");
 
+// ✅ FIX: State for Language Selection
+const [testLanguage, setTestLanguage] = useState(() => {
+  const studentInfo = JSON.parse(localStorage.getItem("studentInfo") || "{}");
+  return studentInfo.language || "english";
+});
+
 const testStateKey = `test_state_${id}_${user?.email || 'guest'}`;
 
 // ✅ FIX: Reference for test to prevent stale closure bugs in event listeners
@@ -718,7 +724,7 @@ if (!isAllowed) {
         if (firstSection?.time) {
           setSectionTimeLeft(firstSection.time * 60);
         }
-        setTime((data.totalTime || 1) * 60);
+        setTime((data.totalTime || 0) * 60);
         const firstQ = firstSection?.questions?.[0];
         if (data.enableTimer && firstQ) {
           setQTimeLeft(firstQ.time || 0);
@@ -754,210 +760,101 @@ if (!isAllowed) {
   // ================= TOTAL TIMER =================
   useEffect(() => {
     if (!isReadyRef.current || test?.timerMode !== "total" || submittedRef.current) return;
+    if (!test?.totalTime || test.totalTime <= 0) return; // Unlimited test
 
-    if (time === null || time === undefined) return;
-
-    if (time <= 0 && !submitted) {
-
-        setTime(0);
-
+    if (time <= 0) {
+      if (!submitted) {
         submitReasonRef.current = "Auto-Submit: Total test time expired";
         setPopup("autosubmit");
-
         if (!submittedRef.current && handleSubmitRef.current) handleSubmitRef.current();
-
-        return;
       }
-
-    const t = setInterval(() => {
-
-  setTime(prev => {
-
-    if (prev <= 1) {
-
-      clearInterval(t);
-
-      return 0;
-
+      return;
     }
 
-    return prev - 1;
-
-  });
-
-}, 1000);
+    const t = setInterval(() => setTime(prev => Math.max(0, prev - 1)), 1000);
     return () => clearInterval(t);
-  }, [time, submitted]);
+  }, [time, submitted, test]);
 
   // ================= PER QUESTION TIMER =================
   useEffect(() => {
     if (!isReadyRef.current || test?.timerMode !== "question" || submittedRef.current) return;
+    
+    const currentQTime = sections[sectionIndex]?.questions?.[current]?.time;
+    if (!currentQTime || currentQTime <= 0) return; // Unlimited question
 
-   if (qTimeLeft <= 0) {
+    if (qTimeLeft <= 0) {
+      setLockNavigation(false);
+      const next = current + 1;
+      const qList = sections[sectionIndex]?.questions || [];
 
-  setQTimeLeft(0);
-
-  setLockNavigation(false);
-
-  const next = current + 1;
-
-  // NEXT QUESTION
-  if (next < questions.length) {
-
-    setCurrent(next);
-
-    const nextQ = questions[next];
-
-    setQTimeLeft(nextQ?.time || 0);
-
-    setLockNavigation(true);
-
-  }
-
-  // NEXT SECTION
-  else if (sectionIndex + 1 < sections.length) {
-
-    const nextSection = sectionIndex + 1;
-
-    setSectionIndex(nextSection);
-
-    setCurrent(0);
-
-    const firstQ =
-      sections[nextSection]?.questions?.[0];
-
-    setQTimeLeft(firstQ?.time || 0);
-
-    setLockNavigation(true);
-
-  }
-
-  // FINAL SUBMIT
-  else {
-
-    if (handleSubmitRef.current) handleSubmitRef.current();
-
-  }
-
-  return;
-}
-
-    const t = setInterval(() => {
-      setQTimeLeft(prev => {
-
-  if (prev <= 1) {
-
-    clearInterval(t);
-
-    return 0;
-
-  }
-
-  return prev - 1;
-
-});
-    }, 1000);
-
-    return () => clearInterval(t);
-
-  }, [qTimeLeft, test?.enableTimer]);
-
-  // ================= SECTION TIMER =================
-useEffect(() => {
-
-  if (!isReadyRef.current || test?.timerMode !== "section" || submittedRef.current) return;
-
- if (sectionTimeLeft <= 0 && !submitted) {
-
-    // ✅ SHOW POPUP
-   setPopup("section-change");
-
-    // ✅ LOCK CURRENT SECTION
-    setLockedSections(prev => [
-      ...prev,
-      sectionIndex
-    ]);
-
-    const nextSection = sectionIndex + 1;
-
-    // ================= NEXT SECTION =================
-    if (nextSection < sections.length) {
-
-      setTimeout(() => {
-
-        // CLOSE POPUP
-        setPopup(null);
-
-        // CHANGE SECTION
+      // NEXT QUESTION
+      if (next < qList.length) {
+        setCurrent(next);
+        setQTimeLeft(qList[next]?.time || 0);
+        setLockNavigation(true);
+      }
+      // NEXT SECTION
+      else if (sectionIndex + 1 < sections.length) {
+        const nextSection = sectionIndex + 1;
         setSectionIndex(nextSection);
-
-        // RESET QUESTION
         setCurrent(0);
-
-        // RESET TIMER
-        setSectionTimeLeft(
-          (sections[nextSection]?.time || 0) * 60
-        );
-
-        // RESET QUESTION TIMER
-        const firstQ =
-          sections[nextSection]?.questions?.[0];
-
-        if (test?.enableTimer && firstQ) {
-
-          setQTimeLeft(firstQ.time || 0);
-
-          setLockNavigation(true);
-
+        const firstQ = sections[nextSection]?.questions?.[0];
+        setQTimeLeft(firstQ?.time || 0);
+        setLockNavigation(true);
+      }
+      // FINAL SUBMIT
+      else {
+        if (!submitted) {
+          submitReasonRef.current = "Auto-Submit: Final question time expired";
+          setPopup("autosubmit");
+          if (!submittedRef.current && handleSubmitRef.current) handleSubmitRef.current();
         }
-
-      }, 2000);
-
+      }
+      return;
     }
 
-    // ================= FINAL SUBMIT =================
-else {
+    const t = setInterval(() => setQTimeLeft(prev => Math.max(0, prev - 1)), 1000);
+    return () => clearInterval(t);
+  }, [qTimeLeft, current, sectionIndex, sections, test, submitted]);
 
-  setPopup("autosubmit");
+  // ================= SECTION TIMER =================
+  useEffect(() => {
+    if (!isReadyRef.current || test?.timerMode !== "section" || submittedRef.current) return;
+    
+    const currentSecTime = sections[sectionIndex]?.time;
+    if (!currentSecTime || currentSecTime <= 0) return; // Unlimited section
 
-  if (!submittedRef.current && handleSubmitRef.current) {
-    handleSubmitRef.current();
-  }
+    if (sectionTimeLeft <= 0) {
+      if (!submitted) {
+        setLockedSections(prev => [...prev, sectionIndex]);
+        const nextSection = sectionIndex + 1;
 
-}
+        if (nextSection < sections.length) {
+          setPopup("section-change");
+          setTimeout(() => {
+            setPopup(null);
+            setSectionIndex(nextSection);
+            setCurrent(0);
+            setSectionTimeLeft((sections[nextSection]?.time || 0) * 60);
+            
+            const firstQ = sections[nextSection]?.questions?.[0];
+            if (test?.enableTimer && firstQ) {
+              setQTimeLeft(firstQ.time || 0);
+              setLockNavigation(true);
+            }
+          }, 2000);
+        } else {
+          submitReasonRef.current = "Auto-Submit: Final section time expired";
+          setPopup("autosubmit");
+          if (!submittedRef.current && handleSubmitRef.current) handleSubmitRef.current();
+        }
+      }
+      return;
+    }
 
-    return;
-  }
-
-  // ✅ TIMER INTERVAL
-  const timer = setInterval(() => {
-
-    setSectionTimeLeft(prev => {
-
-  if (prev <= 1) {
-
-    clearInterval(timer);
-
-    return 0;
-
-  }
-
-  return prev - 1;
-
-});
-
-  }, 1000);
-
-  // ✅ CLEANUP
-  return () => clearInterval(timer);
-
-}, [
-  sectionTimeLeft,
-  sectionIndex,
-  sections,
-  test,
-  submitted
-]);
+    const timer = setInterval(() => setSectionTimeLeft(prev => Math.max(0, prev - 1)), 1000);
+    return () => clearInterval(timer);
+  }, [sectionTimeLeft, sectionIndex, sections, test, submitted]);
 
   // ================= PAYMENT =================
   const handlePayment = async () => {
@@ -1197,15 +1094,29 @@ const currentQ = questions[current] || {};
 const originalSecIdx = currentSection?.originalSecIdx ?? sectionIndex;
 const currentKey = `${originalSecIdx}-${currentQ?.originalIndex ?? current}`;
 
-const answeredCount = Object.keys(answers).filter(k => answers[k] && !review[k]).length;
-const markedCount = Object.keys(review).filter(k => review[k] && !answers[k]).length;
-const answeredMarkedCount = Object.keys(answers).filter(k => answers[k] && review[k]).length;
-const totalQuestions = sections.reduce(
-  (acc, sec) => acc + sec.questions.length,
-  0
-);
+// ✅ SECTION-WISE COUNTS FOR LEFT PANEL
+const sectionPrefix = `${originalSecIdx}-`;
+const secAnsweredCount = Object.keys(answers).filter(k => k.startsWith(sectionPrefix) && answers[k] && !review[k]).length;
+const secMarkedCount = Object.keys(review).filter(k => k.startsWith(sectionPrefix) && review[k] && !answers[k]).length;
+const secAnsweredMarkedCount = Object.keys(answers).filter(k => k.startsWith(sectionPrefix) && answers[k] && review[k]).length;
+const secTotalQuestions = questions.length;
+const secNotAnsweredCount = Math.max(secTotalQuestions - secAnsweredCount - secMarkedCount - secAnsweredMarkedCount, 0);
 
-const notAnsweredCount = Math.max(totalQuestions - answeredCount - markedCount - answeredMarkedCount, 0);
+// ✅ TOTAL COUNTS FOR FINAL SUBMIT SUMMARY
+const totalAnsweredCount = Object.keys(answers).filter(k => answers[k] && !review[k]).length;
+const totalMarkedCount = Object.keys(review).filter(k => review[k] && !answers[k]).length;
+const totalAnsweredMarkedCount = Object.keys(answers).filter(k => answers[k] && review[k]).length;
+const allQuestionsCount = sections.reduce((acc, sec) => acc + sec.questions.length, 0);
+const totalNotAnsweredCount = Math.max(allQuestionsCount - totalAnsweredCount - totalMarkedCount - totalAnsweredMarkedCount, 0);
+
+// ✅ GOVT EXAM HELPER: Safely fallback to English if Hindi translation is blank
+const getLangText = (textEng, textHin) => {
+  const isHinEmpty = !textHin || textHin === '<p><br></p>' || textHin.trim() === '';
+  return testLanguage === 'hindi' && !isHinEmpty ? textHin : (textEng || "");
+};
+
+// ✅ AUTO-DETECT BILINGUAL TEST
+const hasHindi = test?.sections?.some(sec => sec.questions?.some(q => q.qHindi && q.qHindi !== '<p><br></p>' && q.qHindi.trim() !== ''));
 
 return (
   <div className="exam-container">
@@ -1276,10 +1187,10 @@ return (
       </div>
 
       <div className="legend">
-        <p>✅ Answered: {answeredCount}</p>
-        <p>🟪 Marked: {markedCount}</p>
-        <p>🟣 Answered & Marked: {answeredMarkedCount}</p>
-        <p>⬜ Not Answered: {notAnsweredCount}</p>
+        <p>✅ Answered: {secAnsweredCount}</p>
+        <p>🟪 Marked: {secMarkedCount}</p>
+        <p>🟣 Answered & Marked: {secAnsweredMarkedCount}</p>
+        <p>⬜ Not Answered: {secNotAnsweredCount}</p>
         <p style={{ marginTop: '10px', fontWeight: 'bold' }}>🎯 Total Marks: {totalMarksCalc}</p>
       </div>
     </div>
@@ -1444,10 +1355,20 @@ return (
       <div className="question-area">
         <h3 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span>Question {current + 1}</span>
-          <span style={{ fontSize: '14px', color: '#64748b', fontWeight: 'normal' }}>
-            [+{currentQ?.marksCorrect !== undefined && currentQ?.marksCorrect !== null ? currentQ.marksCorrect : (test?.marksCorrect || 4)}, 
-            -{currentQ?.marksNegative !== undefined && currentQ?.marksNegative !== null ? currentQ.marksNegative : (test?.marksNegative || 1)} Marks]
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            {hasHindi && <select 
+              value={testLanguage} 
+              onChange={(e) => setTestLanguage(e.target.value)}
+              style={{ padding: "4px 8px", borderRadius: "4px", border: "1px solid #cbd5e1", fontSize: "14px", fontWeight: "normal", outline: "none", cursor: "pointer" }}
+            >
+              <option value="english">English</option>
+              <option value="hindi">Hindi</option>
+            </select>}
+            <span style={{ fontSize: '14px', color: '#64748b', fontWeight: 'normal' }}>
+              [+{currentQ?.marksCorrect !== undefined && currentQ?.marksCorrect !== null ? currentQ.marksCorrect : (test?.marksCorrect || 4)}, 
+              -{currentQ?.marksNegative !== undefined && currentQ?.marksNegative !== null ? currentQ.marksNegative : (test?.marksNegative || 1)} Marks]
+            </span>
+          </div>
         </h3>
 
         {/* FIGURE / QUESTION IMAGE */}
@@ -1463,7 +1384,7 @@ return (
         
         <div 
           className="question-text" 
-          dangerouslySetInnerHTML={{ __html: currentQ?.q || "" }} 
+          dangerouslySetInnerHTML={{ __html: getLangText(currentQ?.q, currentQ?.qHindi) }} 
           style={{ fontSize: "16px", marginBottom: "15px", lineHeight: "1.6" }} 
         />
 
@@ -1481,7 +1402,7 @@ return (
     >
       <strong>{letter}.</strong>
 
-      <span dangerouslySetInnerHTML={{ __html: currentQ?.options?.[letter] || "" }} />
+      <span dangerouslySetInnerHTML={{ __html: getLangText(currentQ?.options?.[letter], currentQ?.optionsHindi?.[letter]) }} />
     </div>
   ))
 )}
@@ -1596,7 +1517,6 @@ return (
                 test?.timerMode !== "section" &&
                 sectionIndex + 1 >= sections.length
               ) {
-
                 let hasTimeRemaining = false;
                 if (test?.timerMode === "total" && time > 0) hasTimeRemaining = true;
                 else if (test?.timerMode === "question" && qTimeLeft > 0) hasTimeRemaining = true;
@@ -1616,7 +1536,6 @@ return (
         {/* SUBMIT */}
         <button className="submit-btn" onClick={() => {
           let hasTimeRemaining = false;
-
           if (test?.timerMode === "total" && time > 0) {
             hasTimeRemaining = true;
           } else if (test?.timerMode === "section" && (sectionIndex < sections.length - 1 || sectionTimeLeft > 0)) {
@@ -1754,10 +1673,10 @@ return (
           {popup === "summary" && (
             <>
               <h3>Submit Test?</h3>
-              <p>Answered: {answeredCount}</p>
-              <p>Answered & Marked (Evaluated): {answeredMarkedCount}</p>
-              <p>Marked for Review (Unanswered): {markedCount}</p>
-              <p>Not Answered: {notAnsweredCount}</p>
+              <p>Answered: {totalAnsweredCount}</p>
+              <p>Answered & Marked (Evaluated): {totalAnsweredMarkedCount}</p>
+              <p>Marked for Review (Unanswered): {totalMarkedCount}</p>
+              <p>Not Answered: {totalNotAnsweredCount}</p>
 
               <div className="popup-actions">
                 <button onClick={() => setPopup(null)}>Cancel</button>

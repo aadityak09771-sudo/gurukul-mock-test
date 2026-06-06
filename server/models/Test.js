@@ -7,6 +7,11 @@ const questionSchema = new mongoose.Schema({
     required: true,
   },
 
+  qHindi: {
+    type: String,
+    default: "",
+  },
+
   questionImage: {
     type: String,
     default: "",
@@ -14,6 +19,14 @@ const questionSchema = new mongoose.Schema({
 
   // ✅ OPTIONS
   options: {
+  A: { type: String, default: "" },
+  B: { type: String, default: "" },
+  C: { type: String, default: "" },
+  D: { type: String, default: "" },
+},
+
+  // ✅ HINDI OPTIONS
+  optionsHindi: {
   A: { type: String, default: "" },
   B: { type: String, default: "" },
   C: { type: String, default: "" },
