@@ -277,7 +277,7 @@ const ResultPage = ({ result: propResult }) => {
                 <div key={index} style={{ padding: "15px", background: "#f8fafc", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                     <strong style={{ fontSize: "15px", color: "#1e293b" }}>{sec.sectionName}</strong>
-                    <span style={{ fontSize: "14px", fontWeight: "bold", color: "#3b82f6" }}>Score: {sec.score}</span>
+                    <span style={{ fontSize: "14px", fontWeight: "bold", color: "#3b82f6" }}>Score: {sec.score} / {sec.totalMarks || (sec.total * (result.testId?.marksCorrect || 4))}</span>
                   </div>
                   <div style={{ display: "flex", gap: "20px", alignItems: "center", marginTop: "10px" }}>
                     <div style={{ width: "80px", height: "80px", borderRadius: "50%", background: `conic-gradient(#16a34a 0% ${secCorrectPct}%, #dc2626 ${secCorrectPct}% ${secCorrectPct + secWrongPct}%, #cbd5e1 ${secCorrectPct + secWrongPct}% ${secCorrectPct + secWrongPct + secUnattemptedPct}%, #f59e0b ${secCorrectPct + secWrongPct + secUnattemptedPct}% 100%)`, boxShadow: "0 2px 4px rgba(0,0,0,0.1)", flexShrink: 0 }}></div>
@@ -316,7 +316,7 @@ const ResultPage = ({ result: propResult }) => {
                       <td style={{ padding: "10px" }}>{sec.correct}</td>
                       <td style={{ padding: "10px" }}>{sec.wrong}</td>
                       <td style={{ padding: "10px" }}>{secUnattempted}</td>
-                      <td style={{ padding: "10px" }}>{sec.score}</td>
+                      <td style={{ padding: "10px" }}>{sec.score} / {sec.totalMarks || (sec.total * (result.testId?.marksCorrect || 4))}</td>
                       <td style={{ padding: "10px" }}>{sec.total}</td>
                     </tr>
                   )

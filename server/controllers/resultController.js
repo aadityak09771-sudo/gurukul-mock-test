@@ -5,6 +5,8 @@ const Result = require("../models/Result");
 const nodemailer = require("nodemailer");
 const https = require('https');
 const http = require('http');
+const fs = require('fs');
+const path = require('path');
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || "smtp.gmail.com",
@@ -114,6 +116,25 @@ const getLangOptions = (optEng, optHin, language) => {
   return language === 'hindi' && !isHinEmpty ? optHin : (optEng || null);
 };
 
+// ✅ HELPER: Auto-Detect and Apply Devanagari Font Safely
+const applyDevanagariFont = (doc) => {
+  try {
+    const possiblePaths = [
+      path.join(__dirname, '../fonts/NotoSansDevanagari-Regular.ttf'),
+      path.join(__dirname, '../fonts/Noto_Sans_Devanagari/NotoSansDevanagari-Regular.ttf'),
+      path.join(__dirname, '../fonts/Noto_Sans_Devanagari/static/NotoSansDevanagari-Regular.ttf'),
+      path.join(__dirname, '../fonts/NotoSansDevanagari.ttf')
+    ];
+    for (const fontPath of possiblePaths) {
+      if (fs.existsSync(fontPath)) {
+        doc.registerFont('Devanagari', fontPath);
+        doc.font('Devanagari');
+        return true;
+      }
+    }
+  } catch (err) {}
+  return false;
+};
 
 // ================= SUBMIT RESULT =================
 exports.submitResult = async (req, res) => {
@@ -258,6 +279,7 @@ sectionResults.push({
   total: sectionTotalMCQ,
 
   score: sectionScore,
+  totalMarks: sectionTotal,
   written: sectionWritten
 
 });
@@ -472,6 +494,9 @@ const results = await Result.find(filter)
 
     const doc = new PDFDocument({ margin: 30 });
 
+    // ✅ SAFE LOCAL FONT LOADING
+    applyDevanagariFont(doc);
+
     res.setHeader(
       "Content-Type",
       "application/pdf"
@@ -517,9 +542,11 @@ const results = await Result.find(filter)
       if (r.sectionResults && r.sectionResults.length > 0) {
         const secText = r.sectionResults.map(s => {
           const pct = s.total > 0 ? Math.round((s.correct / s.total) * 100) : 0;
-          return `${s.sectionName}: ${s.correct}/${s.total} (${pct}%)` + (s.written ? `, ${s.written} Written` : "");
-        }).join("  |  ");
-        doc.fontSize(10).text(`Section Details: ${secText}`);
+          const maxMarks = s.totalMarks || (s.total * 4);
+          const unattempted = Math.max(0, (s.total || 0) - (s.correct || 0) - (s.wrong || 0));
+          return `${s.sectionName} - Score: ${s.score}/${maxMarks} (${pct}%) [C:${s.correct}, W:${s.wrong}, U:${unattempted}]` + (s.written ? `, ${s.written} Written` : "");
+        }).join("\n  ");
+        doc.fontSize(10).text(`Section Details:\n  ${secText}`);
         doc.fontSize(12);
       }
 
@@ -537,6 +564,14 @@ const results = await Result.find(filter)
       if (course) doc.text(`Course: ${course}`);
       if (branch) doc.text(`Branch: ${branch}`);
       if (section) doc.text(`Section: ${section}`);
+
+      // Include dynamically any other fields
+      const customFieldsArr = Object.entries(r.studentFields || {})
+        .filter(([k]) => !['name', 'email', 'phone', 'roll', 'rollno', 'roll no', 'course', 'branch', 'section'].includes(k.toLowerCase()))
+        .map(([k, v]) => `${k}: ${v}`);
+      if (customFieldsArr.length > 0) {
+        doc.text(`Other Info: ${customFieldsArr.join(" | ")}`);
+      }
 
       doc.text(`Tab Switches: ${r.violations?.tabSwitches || 0}`);
 
@@ -616,6 +651,21 @@ const results = await Result.find(filter)
     if (hasBranch) columns.push({ header: "Branch", key: "branch", width: 15 });
     if (hasSection) columns.push({ header: "Section", key: "section", width: 15 });
 
+    let dynamicFields = new Set();
+    results.forEach(r => {
+      if (r.studentFields) {
+        Object.keys(r.studentFields).forEach(k => {
+          if (!['name', 'email', 'phone', 'roll', 'rollno', 'roll no', 'course', 'branch', 'section'].includes(k.toLowerCase())) {
+            dynamicFields.add(k);
+          }
+        });
+      }
+    });
+
+    dynamicFields.forEach(field => {
+      columns.push({ header: field, key: `custom_${field}`, width: 20 });
+    });
+
     columns.push(
       { header: "Test", key: "testName", width: 30 },
       { header: "Score", key: "score", width: 15 },
@@ -665,7 +715,9 @@ const results = await Result.find(filter)
 
         sectionResults: r.sectionResults && r.sectionResults.length > 0 ? r.sectionResults.map(s => {
             const pct = s.total > 0 ? Math.round((s.correct / s.total) * 100) : 0;
-            return `${s.sectionName}: ${s.correct}/${s.total} (${pct}%)` + (s.written ? ` | ${s.written} Written` : "");
+            const maxMarks = s.totalMarks || (s.total * 4);
+            const secUnattempted = Math.max(0, (s.total || 0) - (s.correct || 0) - (s.wrong || 0));
+            return `${s.sectionName} - Score: ${s.score}/${maxMarks} (${pct}%) [C:${s.correct}, W:${s.wrong}, U:${secUnattempted}]` + (s.written ? ` | ${s.written} Written` : "");
         }).join("  ||  ") : "N/A",
 
         tabSwitches: r.violations?.tabSwitches || 0,
@@ -675,6 +727,10 @@ const results = await Result.find(filter)
         ).toLocaleDateString()
 
       };
+
+      dynamicFields.forEach(field => {
+        rowData[`custom_${field}`] = r.studentFields?.[field] || "N/A";
+      });
 
       worksheet.addRow(rowData);
 
@@ -730,6 +786,9 @@ exports.exportStudentPDF = async (req, res) => {
     }
 
     const doc = new PDFDocument();
+
+    // ✅ SAFE LOCAL FONT LOADING
+    applyDevanagariFont(doc);
 
     res.setHeader(
       "Content-Type",
@@ -804,6 +863,13 @@ exports.exportStudentPDF = async (req, res) => {
     if (branch) doc.text(`Branch: ${branch}`);
     if (section) doc.text(`Section: ${section}`);
     if (course || branch || section) doc.moveDown();
+
+    Object.entries(result.studentFields || {}).forEach(([k, v]) => {
+      if (!['name', 'email', 'phone', 'roll', 'rollno', 'roll no', 'course', 'branch', 'section'].includes(k.toLowerCase())) {
+        doc.text(`${k}: ${v}`);
+      }
+    });
+    if (Object.keys(result.studentFields || {}).length > 0) doc.moveDown();
 
     // ================= PERFORMANCE OVERVIEW =================
     const totalCorrect = result.sectionResults?.reduce((acc, sec) => acc + (sec.correct || 0), 0) || 0;
@@ -950,13 +1016,15 @@ exports.exportStudentPDF = async (req, res) => {
               doc.fillColor('black').text(`Written: ${secWritten}`, legendX + 15, legendY - 1);
             }
 
+            const maxMarks = section.totalMarks || (section.total * 4);
             doc.y = cy + radius + 15;
             doc.x = doc.page.margins.left;
-            doc.fontSize(12).fillColor('black').text(`Score: ${section.score}`, doc.x, doc.y);
+            doc.fontSize(12).fillColor('black').text(`Score: ${section.score} / ${maxMarks}`, doc.x, doc.y);
             doc.moveDown(1);
           } else {
               doc.fontSize(12);
-              doc.text(`Score: ${section.score}`);
+              const maxMarks = section.totalMarks || (section.total * 4);
+              doc.text(`Score: ${section.score} / ${maxMarks}`);
               if (section.written > 0) {
                 doc.text(`Written Qs: ${section.written}`);
               }
@@ -1099,9 +1167,9 @@ exports.exportStudentPDF = async (req, res) => {
 
             doc.moveDown(0.5);
             if (chosen) {
-              doc.fillColor(isCorrect ? 'green' : 'red').text(`Your Answer: ${chosen} ${isCorrect ? '(Correct)' : '(Wrong)'}`);
+              doc.fillColor(isCorrect ? 'green' : 'red').text(`Your Answer: ${chosen} ${isCorrect ? '(Correct)' : '(Wrong)'}  |  Correct Answer: ${q.correct}`);
             } else {
-              doc.fillColor('gray').text(`Your Answer: Not Attempted`);
+              doc.fillColor('gray').text(`Your Answer: Not Attempted  |  Correct Answer: ${q.correct}`);
             }
             doc.moveDown(1);
           }
@@ -1255,6 +1323,14 @@ exports.exportStudentExcel = async (
       { field: "Test", value: result.testName }, { field: "Percentile Rank", value: `${percentileRank}% (out of ${totalParticipants})` },
     ];
 
+    if (result.studentFields) {
+      Object.keys(result.studentFields).forEach(k => {
+        if (!['name', 'email', 'phone', 'roll', 'rollno', 'roll no', 'course', 'branch', 'section'].includes(k.toLowerCase())) {
+          infoData.push({ field: k, value: result.studentFields[k] });
+        }
+      });
+    }
+
     infoData.forEach(item => {
       const row = sheet.addRow([item.field, item.value]);
       row.getCell(1).font = { bold: true };
@@ -1282,7 +1358,8 @@ exports.exportStudentExcel = async (
         section => {
           const secUnattempted = Math.max(0, (section.total || 0) - (section.correct || 0) - (section.wrong || 0));
           const secPct = section.total > 0 ? `${((section.correct / section.total) * 100).toFixed(1)}%` : "0%";
-          const rowData = [section.sectionName, secPct, section.correct, section.wrong, secUnattempted, section.score, section.total, section.written || 0];
+          const maxMarks = section.totalMarks || (section.total * 4);
+          const rowData = [section.sectionName, secPct, section.correct, section.wrong, secUnattempted, `${section.score} / ${maxMarks}`, section.total, section.written || 0];
           const dataRow = sheet.addRow(rowData);
           dataRow.eachCell(cell => cell.border = cellBorder);
           currentRow++;
@@ -1489,7 +1566,7 @@ const generateEmailHTML = (result, test) => {
             <td style="padding: 10px; border: 1px solid #cbd5e1;">${sec.correct}</td>
             <td style="padding: 10px; border: 1px solid #cbd5e1;">${sec.wrong}</td>
             <td style="padding: 10px; border: 1px solid #cbd5e1;">${secUnattempted}</td>
-            <td style="padding: 10px; border: 1px solid #cbd5e1;">${sec.score}</td>
+            <td style="padding: 10px; border: 1px solid #cbd5e1;">${sec.score} / ${sec.totalMarks || (sec.total * 4)}</td>
             <td style="padding: 10px; border: 1px solid #cbd5e1;">${sec.total}</td>
             <td style="padding: 10px; border: 1px solid #cbd5e1;">${sec.written || 0}</td>
           </tr>

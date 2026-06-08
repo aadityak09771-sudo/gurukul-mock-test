@@ -969,7 +969,10 @@ if (!isAllowed) {
         noiseViolations: noiseViolationCountRef.current,
         reason: submitReasonRef.current
       },
-      studentFields: studentInfo,
+      studentFields: {
+        ...studentInfo,
+        language: testLanguage
+      },
 
     };
 
@@ -1456,6 +1459,25 @@ return (
 
         }}>
           Previous
+        </button>
+
+        {/* JUST MARK */}
+        <button className="mark-btn" onClick={() => {
+          if (lockNavigation) {
+            setPopup("wait-timer");
+            return;
+          }
+          setReview(prev => {
+            const updated = { ...prev };
+            if (updated[currentKey]) {
+              delete updated[currentKey];
+            } else {
+              updated[currentKey] = true;
+            }
+            return updated;
+          });
+        }} style={{ background: review[currentKey] ? "#a16207" : "#eab308", color: "white", padding: "10px 20px", borderRadius: "8px", border: "none", cursor: "pointer", fontWeight: "bold", fontSize: "14px", transition: "all 0.2s" }}>
+          {review[currentKey] ? "Unmark" : "Mark"}
         </button>
 
         {/* MARK */}
