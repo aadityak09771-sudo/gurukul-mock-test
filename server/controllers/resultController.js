@@ -361,7 +361,7 @@ exports.getAllResults = async (req, res) => {
     if (testId) filter.testId = testId;
 
     const results = await Result.find(filter)
-      .populate("testId", "title") // ✅ IMPORTANT
+      .populate("testId", "title marksCorrect marksNegative") // ✅ IMPORTANT
       .sort({ createdAt: -1 })
       .lean(); // ✅ Bypasses Mongoose strict schema filtering to show new fields
 
@@ -489,7 +489,7 @@ if (
 }
 
 const results = await Result.find(filter)
-      .populate("testId", "title")
+      .populate("testId", "title marksCorrect marksNegative")
       .sort({ createdAt: -1 });
 
     const doc = new PDFDocument({ margin: 30 });
@@ -542,7 +542,7 @@ const results = await Result.find(filter)
       if (r.sectionResults && r.sectionResults.length > 0) {
         const secText = r.sectionResults.map(s => {
           const pct = s.total > 0 ? Math.round((s.correct / s.total) * 100) : 0;
-          const maxMarks = s.totalMarks || (s.total * 4);
+          const maxMarks = s.totalMarks || (s.total * (r.testId?.marksCorrect || 4));
           const unattempted = Math.max(0, (s.total || 0) - (s.correct || 0) - (s.wrong || 0));
           return `${s.sectionName} - Score: ${s.score}/${maxMarks} (${pct}%) [C:${s.correct}, W:${s.wrong}, U:${unattempted}]` + (s.written ? `, ${s.written} Written` : "");
         }).join("\n  ");
@@ -557,7 +557,7 @@ const results = await Result.find(filter)
       );
 
       // ✅ Explicit Primary Fields
-      const course = r.studentFields?.course || r.studentFields?.Course;
+      const course = r.studentFields?.course || r.studentFields?.Course || r.studentFields?.class || r.studentFields?.Class;
       const branch = r.studentFields?.branch || r.studentFields?.Branch;
       const section = r.studentFields?.section || r.studentFields?.Section;
 
@@ -567,7 +567,7 @@ const results = await Result.find(filter)
 
       // Include dynamically any other fields
       const customFieldsArr = Object.entries(r.studentFields || {})
-        .filter(([k]) => !['name', 'email', 'phone', 'roll', 'rollno', 'roll no', 'course', 'branch', 'section'].includes(k.toLowerCase()))
+        .filter(([k]) => !['name', 'email', 'phone', 'roll', 'rollno', 'roll no', 'course', 'class', 'branch', 'section'].includes(k.toLowerCase()))
         .map(([k, v]) => `${k}: ${v}`);
       if (customFieldsArr.length > 0) {
         doc.text(`Other Info: ${customFieldsArr.join(" | ")}`);
@@ -640,14 +640,14 @@ if (
 }
 
 const results = await Result.find(filter)
-      .populate("testId", "title")
+      .populate("testId", "title marksCorrect marksNegative")
       .sort({ createdAt: -1 });
 
-    const hasCourse = results.some(r => r.studentFields?.course || r.studentFields?.Course);
+    const hasCourse = results.some(r => r.studentFields?.course || r.studentFields?.Course || r.studentFields?.class || r.studentFields?.Class);
     const hasBranch = results.some(r => r.studentFields?.branch || r.studentFields?.Branch);
     const hasSection = results.some(r => r.studentFields?.section || r.studentFields?.Section);
 
-    if (hasCourse) columns.push({ header: "Course", key: "course", width: 15 });
+    if (hasCourse) columns.push({ header: "Course/Class", key: "course", width: 15 });
     if (hasBranch) columns.push({ header: "Branch", key: "branch", width: 15 });
     if (hasSection) columns.push({ header: "Section", key: "section", width: 15 });
 
@@ -655,7 +655,7 @@ const results = await Result.find(filter)
     results.forEach(r => {
       if (r.studentFields) {
         Object.keys(r.studentFields).forEach(k => {
-          if (!['name', 'email', 'phone', 'roll', 'rollno', 'roll no', 'course', 'branch', 'section'].includes(k.toLowerCase())) {
+          if (!['name', 'email', 'phone', 'roll', 'rollno', 'roll no', 'course', 'class', 'branch', 'section'].includes(k.toLowerCase())) {
             dynamicFields.add(k);
           }
         });
@@ -697,7 +697,7 @@ const results = await Result.find(filter)
 
         studentPhone: r.studentPhone,
 
-        course: r.studentFields?.course || r.studentFields?.Course || "N/A",
+        course: r.studentFields?.course || r.studentFields?.Course || r.studentFields?.class || r.studentFields?.Class || "N/A",
         branch: r.studentFields?.branch || r.studentFields?.Branch || "N/A",
         section: r.studentFields?.section || r.studentFields?.Section || "N/A",
 
@@ -715,7 +715,7 @@ const results = await Result.find(filter)
 
         sectionResults: r.sectionResults && r.sectionResults.length > 0 ? r.sectionResults.map(s => {
             const pct = s.total > 0 ? Math.round((s.correct / s.total) * 100) : 0;
-            const maxMarks = s.totalMarks || (s.total * 4);
+            const maxMarks = s.totalMarks || (s.total * (r.testId?.marksCorrect || 4));
             const secUnattempted = Math.max(0, (s.total || 0) - (s.correct || 0) - (s.wrong || 0));
             return `${s.sectionName} - Score: ${s.score}/${maxMarks} (${pct}%) [C:${s.correct}, W:${s.wrong}, U:${secUnattempted}]` + (s.written ? ` | ${s.written} Written` : "");
         }).join("  ||  ") : "N/A",
@@ -843,7 +843,7 @@ exports.exportStudentPDF = async (req, res) => {
     );
 
     doc.text(
-      `Score: ${result.score}`
+      `Score: ${result.score} / ${result.total}`
     );
 
     doc.text(
@@ -855,7 +855,7 @@ exports.exportStudentPDF = async (req, res) => {
     doc.moveDown();
 
     // ================= PRIMARY STUDENT DETAILS =================
-    const course = result.studentFields?.course || result.studentFields?.Course;
+    const course = result.studentFields?.course || result.studentFields?.Course || result.studentFields?.class || result.studentFields?.Class;
     const branch = result.studentFields?.branch || result.studentFields?.Branch;
     const section = result.studentFields?.section || result.studentFields?.Section;
 
@@ -865,7 +865,7 @@ exports.exportStudentPDF = async (req, res) => {
     if (course || branch || section) doc.moveDown();
 
     Object.entries(result.studentFields || {}).forEach(([k, v]) => {
-      if (!['name', 'email', 'phone', 'roll', 'rollno', 'roll no', 'course', 'branch', 'section'].includes(k.toLowerCase())) {
+      if (!['name', 'email', 'phone', 'roll', 'rollno', 'roll no', 'course', 'class', 'branch', 'section'].includes(k.toLowerCase())) {
         doc.text(`${k}: ${v}`);
       }
     });
@@ -1016,14 +1016,14 @@ exports.exportStudentPDF = async (req, res) => {
               doc.fillColor('black').text(`Written: ${secWritten}`, legendX + 15, legendY - 1);
             }
 
-            const maxMarks = section.totalMarks || (section.total * 4);
+            const maxMarks = section.totalMarks || (section.total * (test?.marksCorrect || 4));
             doc.y = cy + radius + 15;
             doc.x = doc.page.margins.left;
             doc.fontSize(12).fillColor('black').text(`Score: ${section.score} / ${maxMarks}`, doc.x, doc.y);
             doc.moveDown(1);
           } else {
               doc.fontSize(12);
-              const maxMarks = section.totalMarks || (section.total * 4);
+              const maxMarks = section.totalMarks || (section.total * (test?.marksCorrect || 4));
               doc.text(`Score: ${section.score} / ${maxMarks}`);
               if (section.written > 0) {
                 doc.text(`Written Qs: ${section.written}`);
@@ -1323,9 +1323,17 @@ exports.exportStudentExcel = async (
       { field: "Test", value: result.testName }, { field: "Percentile Rank", value: `${percentileRank}% (out of ${totalParticipants})` },
     ];
 
+    const course = result.studentFields?.course || result.studentFields?.Course || result.studentFields?.class || result.studentFields?.Class;
+    const branch = result.studentFields?.branch || result.studentFields?.Branch;
+    const section = result.studentFields?.section || result.studentFields?.Section;
+
+    if (course) infoData.push({ field: "Course", value: course });
+    if (branch) infoData.push({ field: "Branch", value: branch });
+    if (section) infoData.push({ field: "Section", value: section });
+
     if (result.studentFields) {
       Object.keys(result.studentFields).forEach(k => {
-        if (!['name', 'email', 'phone', 'roll', 'rollno', 'roll no', 'course', 'branch', 'section'].includes(k.toLowerCase())) {
+        if (!['name', 'email', 'phone', 'roll', 'rollno', 'roll no', 'course', 'class', 'branch', 'section'].includes(k.toLowerCase())) {
           infoData.push({ field: k, value: result.studentFields[k] });
         }
       });
@@ -1358,7 +1366,7 @@ exports.exportStudentExcel = async (
         section => {
           const secUnattempted = Math.max(0, (section.total || 0) - (section.correct || 0) - (section.wrong || 0));
           const secPct = section.total > 0 ? `${((section.correct / section.total) * 100).toFixed(1)}%` : "0%";
-          const maxMarks = section.totalMarks || (section.total * 4);
+          const maxMarks = section.totalMarks || (section.total * (test?.marksCorrect || 4));
           const rowData = [section.sectionName, secPct, section.correct, section.wrong, secUnattempted, `${section.score} / ${maxMarks}`, section.total, section.written || 0];
           const dataRow = sheet.addRow(rowData);
           dataRow.eachCell(cell => cell.border = cellBorder);
@@ -1566,7 +1574,7 @@ const generateEmailHTML = (result, test) => {
             <td style="padding: 10px; border: 1px solid #cbd5e1;">${sec.correct}</td>
             <td style="padding: 10px; border: 1px solid #cbd5e1;">${sec.wrong}</td>
             <td style="padding: 10px; border: 1px solid #cbd5e1;">${secUnattempted}</td>
-            <td style="padding: 10px; border: 1px solid #cbd5e1;">${sec.score} / ${sec.totalMarks || (sec.total * 4)}</td>
+            <td style="padding: 10px; border: 1px solid #cbd5e1;">${sec.score} / ${sec.totalMarks || (sec.total * (test?.marksCorrect || 4))}</td>
             <td style="padding: 10px; border: 1px solid #cbd5e1;">${sec.total}</td>
             <td style="padding: 10px; border: 1px solid #cbd5e1;">${sec.written || 0}</td>
           </tr>

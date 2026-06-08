@@ -80,6 +80,16 @@ const resultSchema = new mongoose.Schema(
         total: {
           type: Number,
           default: 0
+        },
+
+        totalMarks: {
+          type: Number,
+          default: 0
+        },
+
+        written: {
+          type: Number,
+          default: 0
         }
       }
     ],
